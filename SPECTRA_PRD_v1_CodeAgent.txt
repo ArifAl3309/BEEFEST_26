@@ -1,0 +1,2826 @@
+================================================================
+SPECTRA — PRODUCT REQUIREMENTS DOCUMENT (PRD)
+Versi : 2.0 — Final Enterprise Ultra-Detailed (Code-Ready)
+Scope : B2B SaaS Multi-Tenant + Auth (Login/Signup) + Device Onboarding (Claim & Map Setup) + Interactive Command Center (Floor Plan & PLN Emergency)
+Target: BEEFEST SDLC 2026 | BINUS @Bekasi
+================================================================
+
+CARA PAKAI DOKUMEN INI:
+  Berikan dokumen ini secara utuh ke code agent di awal sesi.
+  Instruksikan agent untuk MEMBACA SELURUH DOKUMEN terlebih
+  dahulu sebelum menulis satu baris kode pun.
+  Mulai selalu dari: "Baca PRD ini, lalu kerjakan FASE 1 saja."
+
+================================================================
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 0 — INSTRUKSI UNTUK CODE AGENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+════════════════════════════════════════════════════════════
+0.1 — BACA INI PERTAMA SEBELUM MELAKUKAN APAPUN
+════════════════════════════════════════════════════════════
+
+Kamu adalah code agent yang bertugas membangun web application
+SPECTRA — platform B2B SaaS Enterprise untuk mitigasi risiko
+kebakaran panel distribusi listrik sekolah multi-tenant,
+sesuai spesifikasi di dokumen ini.
+Sebelum menulis kode:
+
+  1. Baca SELURUH dokumen ini dari awal sampai akhir.
+  2. Jangan mulai coding sebelum membaca semua bagian.
+  3. Jika ada yang ambigu atau bertentangan, TANYA dulu —
+     jangan asumsikan sendiri.
+  4. Kerjakan hanya SATU FASE per sesi. Setelah selesai
+     satu fase, BERHENTI dan laporkan hasilnya.
+  5. Jangan menambah fitur yang tidak ada di dokumen ini.
+  6. Jangan mengubah tech stack yang sudah ditentukan.
+  7. Setiap komponen dibuat sebagai file TERPISAH.
+     Jangan gabungkan dua komponen dalam satu file .tsx.
+  8. Semua kode ditulis dalam TypeScript strict mode. Dilarang 'any'.
+
+════════════════════════════════════════════════════════════
+0.2 — URUTAN BUILD (WAJIB DIIKUTI)
+════════════════════════════════════════════════════════════
+
+Build dilakukan dalam 4 fase berurutan. JANGAN loncat fase.
+Setiap fase harus bisa ditest sebelum lanjut ke fase berikutnya.
+
+  FASE 1 — Backend Core & Database Architecture
+    (Next.js setup + Supabase schema + lib/ + API Routes +
+     Middleware + Design tokens)
+
+  FASE 2 — Gateway & Authentication (Login & Sign Up)
+    (Three.js WebGL background + Auth Tabs + Supabase Auth +
+     Activation Code validation)
+
+  FASE 3 — School & Device Onboarding
+    (Claim Device + Setup Koordinat Sekolah / Digital Map +
+     Initial Panel Registration)
+
+  FASE 4 — Interactive Command Center Dashboard
+    (Navbar + Interactive Floor Plan + Drag-and-Drop Node +
+     Sidebar Metrics + Emergency PLN Dispatch Modal +
+     Supabase Realtime)
+
+Detail setiap fase ada di Bagian 0.3.
+
+════════════════════════════════════════════════════════════
+0.3 — DETAIL SETIAP FASE
+════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────────────────────────
+FASE 1 — Backend Core & Database Architecture
+─────────────────────────────────────────────────────────────
+
+Tujuan: Project Next.js 14 siap berjalan. Supabase terhubung.
+        Semua tabel PostgreSQL, RLS, dan API Route berfungsi.
+        Middleware proteksi route aktif. Tidak ada UI yang
+        dikerjakan di fase ini selain placeholder route.
+
+Tugas yang dikerjakan:
+  1.  Init project Next.js 14 dengan App Router.
+      Nama folder root: spectra
+      Perintah: npx create-next-app@latest spectra \
+                  --typescript --tailwind --eslint \
+                  --app --no-src-dir --import-alias "@/*"
+  2.  Install dependency tambahan sesuai Bagian 13.
+  3.  Buat file .env.local dengan template persis Bagian 4.
+  4.  Jalankan SQL di Supabase SQL Editor:
+      Seluruh SQL di Bagian 5.1 hingga 5.7 secara berurutan.
+  5.  Buat lib/supabase/client.ts persis sesuai Bagian 6.1.
+  6.  Buat lib/supabase/server.ts persis sesuai Bagian 6.2.
+  7.  Buat lib/types/index.ts persis sesuai Bagian 5.8.
+  8.  Buat lib/utils.ts persis sesuai Bagian 6.3.
+  9.  Buat middleware.ts persis sesuai Bagian 8.
+  10. Buat semua API Route sesuai Bagian 9:
+      a. app/api/auth/login/route.ts
+      b. app/api/auth/signup/route.ts
+      c. app/api/auth/logout/route.ts
+      d. app/api/onboarding/claim/route.ts
+      e. app/api/panels/route.ts
+      f. app/api/panels/update-position/route.ts
+      g. app/api/readings/latest/route.ts
+      h. app/api/emergency/pln/route.ts
+  11. Buat app/globals.css dengan CSS Custom Properties
+      persis sesuai Bagian 7.1.
+  12. Ganti isi tailwind.config.ts persis sesuai Bagian 7.2.
+  13. Buat app/layout.tsx root layout:
+      import type { Metadata } from 'next'
+      import { Inter } from 'next/font/google'
+      import './globals.css'
+
+      const inter = Inter({ subsets: ['latin'] })
+
+      export const metadata: Metadata = {
+        title: 'SPECTRA — Electrical Safety Command Center',
+        description: 'Sistem SaaS Pemantauan Dini Kebakaran Panel Listrik Sekolah',
+      }
+
+      export default function RootLayout({
+        children,
+      }: { children: React.ReactNode }) {
+        return (
+          <html lang="id">
+            <body className={inter.className}>{children}</body>
+          </html>
+        )
+      }
+  14. Buat app/(auth)/login/page.tsx placeholder (<div>Login Placeholder</div>).
+  15. Buat app/(onboarding)/onboarding/page.tsx placeholder (<div>Onboarding Placeholder</div>).
+  16. Buat app/(dashboard)/dashboard/page.tsx placeholder (<div>Dashboard Placeholder</div>).
+
+Definisi SELESAI fase ini:
+  - npm run dev berjalan tanpa error di terminal.
+  - Akses /login → tampil teks "Login Placeholder".
+  - Akses /dashboard atau /onboarding tanpa sesi → redirect ke /login.
+  - POST /api/auth/login dengan body kosong → return 400 JSON.
+  - POST /api/auth/signup dengan kode aktivasi salah → return 404/400 JSON.
+  - GET /api/panels tanpa sesi → return 401 JSON.
+
+─────────────────────────────────────────────────────────────
+FASE 2 — Gateway & Authentication (Login & Sign Up)
+─────────────────────────────────────────────────────────────
+
+Tujuan: Halaman /login tampil penuh dengan background WebGL
+        electrical arcs (Three.js), form beralih Tab
+        (Masuk / Pengguna Lama vs Daftar / Pengguna Baru),
+        validasi Kode Aktivasi Perangkat (Tenant ID),
+        serta redirect sesuai status onboarding.
+
+Prasyarat sebelum mulai:
+  - Fase 1 sudah selesai dan seluruh test di atas PASSED.
+  - Seed Data dari Bagian 5.7 sudah ada di database.
+
+Tugas yang dikerjakan:
+  1. Buat components/auth/ElectricalBackground.tsx sesuai Bagian 10.2.
+  2. Buat components/ui/Input.tsx sesuai Bagian 10.4.
+  3. Buat components/ui/Button.tsx sesuai Bagian 10.5.
+  4. Buat components/auth/LoginForm.tsx sesuai Bagian 10.6.
+  5. Buat components/auth/RegisterForm.tsx sesuai Bagian 10.7.
+  6. Buat components/auth/AuthGatewayCard.tsx sesuai Bagian 10.3.
+  7. Ganti isi app/(auth)/login/page.tsx sesuai Bagian 10.1.
+  8. Buat app/(auth)/layout.tsx:
+     export default function AuthLayout({
+       children,
+     }: { children: React.ReactNode }) {
+       return <>{children}</>
+     }
+
+Definisi SELESAI fase ini:
+  - Buka http://localhost:3000/login → halaman tampil penuh.
+  - Background WebGL beranimasi (electrical arcs bergerak,
+    partikel cyan-blue, sambaran petir mikro, tidak freeze).
+  - Vignette radial gelap terlihat memudar ke arah luar layar.
+  - Login card muncul di tengah layar dengan tab "Masuk" dan "Aktivasi Baru".
+  - Submit Login berhasil → redirect ke /dashboard.
+  - Submit Register berhasil dengan kode aktivasi valid → redirect ke /onboarding.
+  - Error message muncul dengan jelas bila kredensial / kode salah.
+
+─────────────────────────────────────────────────────────────
+FASE 3 — School & Device Onboarding
+─────────────────────────────────────────────────────────────
+
+Tujuan: Halaman /onboarding membimbing admin/operator baru
+        menentukan titik geografis sekolah, nama gedung/kampus,
+        dan memverifikasi registrasi perangkat awal.
+
+Prasyarat sebelum mulai:
+  - Fase 1 dan Fase 2 sudah selesai dan PASSED.
+  - Akun login terdaftar dengan tenant yang memiliki onboarding_completed = false.
+
+Tugas yang dikerjakan:
+  1. Buat components/onboarding/SchoolMapSetup.tsx sesuai Bagian 11.2.
+  2. Buat components/onboarding/DeviceVerificationStep.tsx sesuai Bagian 11.3.
+  3. Buat components/onboarding/OnboardingWizard.tsx sesuai Bagian 11.4.
+  4. Ganti isi app/(onboarding)/onboarding/page.tsx sesuai Bagian 11.1.
+  5. Buat app/(onboarding)/layout.tsx:
+     export default function OnboardingLayout({
+       children,
+     }: { children: React.ReactNode }) {
+       return <div className="min-h-screen bg-[--bg-base] text-white">{children}</div>
+     }
+
+Definisi SELESAI fase ini:
+  - Buka /onboarding setelah register → Wizard 2-langkah tampil.
+  - Langkah 1: Verifikasi hardware unit & kode aktivasi tenant.
+  - Langkah 2: Memilih/memasukkan titik koordinat sekolah (Latitude, Longitude, Alamat).
+  - Klik "Selesaikan Konfigurasi" → update tenant ke database dan redirect ke /dashboard.
+
+─────────────────────────────────────────────────────────────
+FASE 4 — Interactive Command Center Dashboard
+─────────────────────────────────────────────────────────────
+
+Tujuan: Halaman /dashboard tampil dengan layout lengkap:
+        Navbar atas, Interactive Floor Plan di area tengah dengan
+        fitur Drag-and-Drop titik panel, Sidebar Metrics di sisi kanan,
+        modul Bantuan Darurat PLN, serta Supabase Realtime live update.
+
+Prasyarat sebelum mulai:
+  - Fase 1, 2, dan 3 sudah selesai dan PASSED.
+  - Supabase Realtime aktif untuk tabel sensor_readings dan alerts.
+
+Tugas yang dikerjakan:
+  1. Buat components/ui/StatusBadge.tsx sesuai Bagian 12.6.
+  2. Buat components/ui/Modal.tsx sesuai Bagian 12.7.
+  3. Buat components/dashboard/Navbar.tsx sesuai Bagian 12.2.
+  4. Buat components/dashboard/PanelNode.tsx sesuai Bagian 12.4.
+  5. Buat components/dashboard/InteractiveFloorPlan.tsx sesuai Bagian 12.3.
+  6. Buat components/dashboard/MetricCard.tsx sesuai Bagian 12.5.
+  7. Buat components/dashboard/PlnEmergencyModal.tsx sesuai Bagian 12.8.
+  8. Buat components/dashboard/SidebarMetrics.tsx sesuai Bagian 12.9.
+  9. Buat components/dashboard/DashboardClientLayout.tsx sesuai Bagian 12.10.
+  10. Ganti isi app/(dashboard)/dashboard/page.tsx sesuai Bagian 12.1.
+  11. Buat app/(dashboard)/layout.tsx sesuai Bagian 12.11.
+  12. Buat public/floor-plan-placeholder.svg sesuai Bagian 12.12.
+
+Definisi SELESAI fase ini:
+  - Buka /dashboard setelah login → navbar, denah sekolah, dan sidebar tampil tanpa error.
+  - Navbar menampilkan logo SPECTRA, nama sekolah tenant, indikator Live berkedip, nama user, tombol Keluar.
+  - Denah menampilkan SVG sekolah dengan titik node panel listrik.
+  - Titik node panel dapat DIGESER (Drag-and-Drop) dan posisi X/Y persentase tersimpan ke database.
+  - Warna node berubah dinamis (Hijau = Normal, Kuning = Waspada, Merah = Bahaya).
+  - Klik titik panel node → sidebar kanan menampilkan metrik: Tegangan, Arus, Daya, Suhu Panel, Suhu Ambient, Frekuensi.
+  - Ketika panel berstatus "danger", muncul banner & tombol aksi "Bantuan Darurat PLN".
+  - Klik "Bantuan Darurat PLN" membuka PlnEmergencyModal dengan kontak PLN 123 dan tombol dispatch laporan darurat.
+  - Data sensor baru di Supabase langsung mengupdate UI tanpa refresh (Supabase Realtime).
+
+════════════════════════════════════════════════════════════
+0.4 — CARA MELAPOR SETELAH SELESAI SATU FASE
+════════════════════════════════════════════════════════════
+
+Setelah selesai satu fase, agent harus:
+  1. Sebutkan file apa saja yang dibuat atau diubah.
+  2. Sebutkan cara test yang harus dilakukan user.
+  3. Sebutkan apa yang belum dikerjakan (fase berikutnya).
+  4. Tanya: "Apakah fase ini sudah di-test dan berjalan?
+     Jika ya, saya akan lanjut ke fase berikutnya."
+  5. BERHENTI dan tunggu konfirmasi dari user sebelum lanjut.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 1 — RINGKASAN PROYEK & ARSITEKTUR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Nama aplikasi  : SPECTRA Enterprise
+Deskripsi      : Platform B2B SaaS Enterprise multi-tenant untuk
+                 pemantauan real-time dan mitigasi dini risiko
+                 kebakaran panel listrik sekolah. Mendeteksi
+                 kelebihan beban (overload), anomali suhu, dan
+                 mikro-arc flash listrik menggunakan edge computing
+                 pada unit mikrokontroler (ESP32-S3 + LoRa/WiFi).
+Folder root    : spectra/
+Target lomba   : BEEFEST SDLC 2026 — BINUS @Bekasi
+
+1.1 — Konsep Multi-Tenant & Kode Aktivasi Perangkat (Tenant ID)
+  - Setiap sekolah adalah satu Tenant independen.
+  - Data antar sekolah terisolasi secara ketat menggunakan PostgreSQL RLS (Row Level Security).
+  - "Kode Aktivasi Perangkat" (contoh: SPEC-LABS-2026) adalah serial aktivasi fisik unik
+    yang disertakan pada box perangkat IoT sekolah.
+  - Operator/PIC sekolah mendaftar secara mandiri (Sign Up) menggunakan Kode Aktivasi tersebut.
+
+1.2 — Edge Computing FFT di Hardware (ESP32-S3)
+  - Pengolahan Fast Fourier Transform (FFT) sinyal frekuensi tinggi untuk
+    mendeteksi percikan arc flash diproses 100% di firmware ESP32 (Edge Processing).
+  - Backend/Cloud HANYA menerima data telemetri matang (tegangan, arus, daya, suhu,
+    frekuensi, status arc_detected) dan status bahaya ('normal' | 'warning' | 'danger').
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 2 — TECH STACK (LOCKED)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Framework       : Next.js 14 (App Router)
+Bahasa          : TypeScript (Strict Mode)
+Styling         : Tailwind CSS v3 + CSS Custom Properties
+Ikon UI         : lucide-react
+Database & RLS  : Supabase (PostgreSQL 15+)
+Autentikasi     : Supabase Auth (Email & Password)
+Realtime        : Supabase Realtime Engine (postgres_changes)
+Supabase SDK    : @supabase/ssr + @supabase/supabase-js
+3D WebGL        : three (npm package)
+Peta Digital    : HTML5 Drag & Drop Coordinate Canvas + Interactive Digital Floor Plan Engine
+HTTP Client     : Fetch API Native
+State Mgmt      : React useState, useEffect, useTransition, useContext
+Font            : next/font/google → Inter
+
+ATURAN WAJIB & LARANGAN:
+  ✗ Dilarang menggunakan Pages Router (/pages) — wajib App Router (/app)
+  ✗ Dilarang Axios — gunakan Fetch API bawaan
+  ✗ Dilarang Redux, Zustand, MobX — gunakan React State & Context
+  ✗ Dilarang type 'any' di TypeScript — gunakan interface yang ketat
+  ✗ Dilarang menyimpan token di localStorage manual — cookie dikelola otomatis oleh @supabase/ssr
+  ✗ Dilarang mengimpor library dari script CDN
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 3 — STRUKTUR FOLDER LENGKAP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+spectra/
+├── app/
+│   ├── (auth)/
+│   │   ├── login/
+│   │   │   └── page.tsx              ← Halaman Login & Sign Up Gateway
+│   │   └── layout.tsx                ← Auth layout
+│   ├── (onboarding)/
+│   │   ├── onboarding/
+│   │   │   └── page.tsx              ← Halaman Onboarding & Map Setup
+│   │   └── layout.tsx                ← Onboarding layout
+│   ├── (dashboard)/
+│   │   ├── dashboard/
+│   │   │   └── page.tsx              ← Command Center Dashboard
+│   │   └── layout.tsx                ← Dashboard layout dengan Navbar
+│   ├── api/
+│   │   ├── auth/
+│   │   │   ├── login/route.ts        ← POST Login
+│   │   │   ├── signup/route.ts       ← POST Signup + Verifikasi Activation Code
+│   │   │   └── logout/route.ts       ← POST Logout
+│   │   ├── onboarding/
+│   │   │   └── claim/route.ts        ← POST Setup data sekolah & peta
+│   │   ├── panels/
+│   │   │   ├── route.ts              ← GET Panels list & POST New Panel
+│   │   │   └── update-position/
+│   │   │       └── route.ts          ← PATCH Update posisi node X/Y di peta
+│   │   ├── readings/
+│   │   │   └── latest/route.ts       ← GET Reading sensor terbaru
+│   │   └── emergency/
+│   │       └── pln/route.ts          ← POST Dispatch darurat ke PLN
+│   ├── globals.css                   ← Design system tokens & animations
+│   └── layout.tsx                    ← Root layout
+├── components/
+│   ├── auth/
+│   │   ├── ElectricalBackground.tsx  ← Three.js WebGL canvas (Arcs & Sparks)
+│   │   ├── AuthGatewayCard.tsx       ← Tab container (Masuk / Aktivasi Baru)
+│   │   ├── LoginForm.tsx             ← Form masuk akun
+│   │   └── RegisterForm.tsx          ← Form registrasi akun + kode aktivasi
+│   ├── onboarding/
+│   │   ├── OnboardingWizard.tsx      ← Wizard multi-step
+│   │   ├── SchoolMapSetup.tsx        ← Setup titik lokasi/koordinat sekolah
+│   │   └── DeviceVerificationStep.tsx← Verifikasi perangkat fisik ESP32
+│   ├── dashboard/
+│   │   ├── Navbar.tsx                ← Sticky top navbar
+│   │   ├── DashboardClientLayout.tsx ← Client context realtime
+│   │   ├── InteractiveFloorPlan.tsx  ← Area tengah denah & drag-drop node
+│   │   ├── PanelNode.tsx             ← Titik panel di denah dengan status pulse
+│   │   ├── SidebarMetrics.tsx        ← Panel samping metrik & trigger PLN
+│   │   ├── MetricCard.tsx            ← Kartu metrik individual
+│   │   └── PlnEmergencyModal.tsx     ← Modal darurat PLN & kontak cepat
+│   └── ui/
+│       ├── Button.tsx                ← Button reusable
+│       ├── Input.tsx                 ← Input field reusable
+│       ├── StatusBadge.tsx           ← Badge status panel
+│       └── Modal.tsx                 ← Dialog modal reusable
+├── lib/
+│   ├── supabase/
+│   │   ├── client.ts                 ← createBrowserClient (@supabase/ssr)
+│   │   └── server.ts                 ← createServerClient + createAdminClient
+│   ├── types/
+│   │   └── index.ts                  ← Seluruh definisi TypeScript interface
+│   └── utils.ts                      ← Helper functions
+├── public/
+│   └── floor-plan-placeholder.svg    ← Mockup denah gedung sekolah
+├── middleware.ts                     ← Route guard & tenant verification
+├── tailwind.config.ts
+├── tsconfig.json
+├── .env.local
+└── package.json
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 4 — ENVIRONMENT VARIABLES (.env.local)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Buat file .env.local di folder root project:
+
+  # Supabase Project Credentials
+  NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+  NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+  SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+  # Konfigurasi Bantuan Darurat PLN
+  NEXT_PUBLIC_PLN_HOTLINE=123
+  NEXT_PUBLIC_PLN_EMERGENCY_API=https://api.spectra.id/v1/mock-pln-dispatch
+
+  # Metadata Aplikasi
+  NEXT_PUBLIC_APP_NAME=SPECTRA
+  NEXT_PUBLIC_APP_VERSION=2.0.0
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 5 — DATABASE SCHEMA (POSTGRESQL / SUPABASE)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Jalankan script SQL berikut secara berurutan di Supabase SQL Editor:
+
+════════════════════════════════════════════════════════════
+5.1 — TABEL: tenants
+════════════════════════════════════════════════════════════
+
+  CREATE TABLE tenants (
+    id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name                 TEXT NOT NULL,
+    activation_code      TEXT UNIQUE NOT NULL,
+    address              TEXT,
+    latitude             FLOAT,
+    longitude            FLOAT,
+    onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE,
+    is_active            BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  );
+
+  CREATE INDEX idx_tenants_activation_code ON tenants(activation_code);
+
+════════════════════════════════════════════════════════════
+5.2 — TABEL: profiles
+════════════════════════════════════════════════════════════
+
+  CREATE TABLE profiles (
+    id           UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    full_name    TEXT NOT NULL,
+    role         TEXT NOT NULL CHECK (role IN ('admin', 'operator')),
+    tenant_id    UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  );
+
+  CREATE INDEX idx_profiles_tenant_id ON profiles(tenant_id);
+
+════════════════════════════════════════════════════════════
+5.3 — TABEL: panels
+════════════════════════════════════════════════════════════
+
+  CREATE TABLE panels (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    name            TEXT NOT NULL,
+    location_label  TEXT,
+    floor_x         FLOAT NOT NULL DEFAULT 50.0,
+    floor_y         FLOAT NOT NULL DEFAULT 50.0,
+    is_active       BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  );
+
+  CREATE INDEX idx_panels_tenant_id ON panels(tenant_id);
+
+════════════════════════════════════════════════════════════
+5.4 — TABEL: sensor_readings
+════════════════════════════════════════════════════════════
+
+  CREATE TABLE sensor_readings (
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    panel_id            UUID NOT NULL REFERENCES panels(id) ON DELETE CASCADE,
+    tenant_id           UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    voltage             FLOAT NOT NULL,
+    current_a           FLOAT NOT NULL,
+    power               FLOAT NOT NULL,
+    temperature_panel   FLOAT NOT NULL,
+    temperature_ambient FLOAT NOT NULL,
+    frequency           FLOAT DEFAULT 50.0,
+    power_factor        FLOAT DEFAULT 0.95,
+    arc_detected        BOOLEAN NOT NULL DEFAULT FALSE,
+    status              TEXT NOT NULL CHECK (status IN ('normal', 'warning', 'danger')),
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  );
+
+  CREATE INDEX idx_readings_panel_id   ON sensor_readings(panel_id);
+  CREATE INDEX idx_readings_tenant_id  ON sensor_readings(tenant_id);
+  CREATE INDEX idx_readings_created_at ON sensor_readings(created_at DESC);
+
+  ALTER PUBLICATION supabase_realtime ADD TABLE sensor_readings;
+
+════════════════════════════════════════════════════════════
+5.5 — TABEL: alerts
+════════════════════════════════════════════════════════════
+
+  CREATE TABLE alerts (
+    id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    panel_id       UUID NOT NULL REFERENCES panels(id) ON DELETE CASCADE,
+    tenant_id      UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    status         TEXT NOT NULL CHECK (status IN ('warning', 'danger')),
+    message        TEXT NOT NULL,
+    pln_dispatched BOOLEAN NOT NULL DEFAULT FALSE,
+    acknowledged   BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  );
+
+  CREATE INDEX idx_alerts_tenant_id  ON alerts(tenant_id);
+  CREATE INDEX idx_alerts_created_at ON alerts(created_at DESC);
+
+  ALTER PUBLICATION supabase_realtime ADD TABLE alerts;
+
+════════════════════════════════════════════════════════════
+5.6 — ROW LEVEL SECURITY (RLS) POLICIES
+════════════════════════════════════════════════════════════
+
+  ALTER TABLE tenants         ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE profiles        ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE panels          ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE sensor_readings ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE alerts          ENABLE ROW LEVEL SECURITY;
+
+  CREATE OR REPLACE FUNCTION get_user_tenant_id()
+  RETURNS UUID AS $$
+    SELECT tenant_id FROM profiles WHERE id = auth.uid();
+  $$ LANGUAGE SQL SECURITY DEFINER STABLE;
+
+  -- Profiles
+  CREATE POLICY "profiles_select_own" ON profiles FOR SELECT USING (id = auth.uid());
+  CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (id = auth.uid());
+
+  -- Tenants
+  CREATE POLICY "tenants_select_own" ON tenants FOR SELECT USING (id = get_user_tenant_id());
+  CREATE POLICY "tenants_update_own" ON tenants FOR UPDATE USING (id = get_user_tenant_id());
+
+  -- Panels
+  CREATE POLICY "panels_all_tenant" ON panels FOR ALL USING (tenant_id = get_user_tenant_id());
+
+  -- Sensor Readings
+  CREATE POLICY "readings_select_tenant" ON sensor_readings FOR SELECT USING (tenant_id = get_user_tenant_id());
+
+  -- Alerts
+  CREATE POLICY "alerts_all_tenant" ON alerts FOR ALL USING (tenant_id = get_user_tenant_id());
+
+════════════════════════════════════════════════════════════
+5.7 — SEED DATA
+════════════════════════════════════════════════════════════
+
+  -- 1. Demo Tenant (Sudah Onboarding)
+  INSERT INTO tenants (id, name, activation_code, address, latitude, longitude, onboarding_completed, is_active)
+  VALUES (
+    'a0000000-0000-0000-0000-000000000001',
+    'SMA Labschool Rawamangun',
+    'SPEC-LABS-2026',
+    'Jl. Pemuda No.10, Rawamangun, Jakarta Timur',
+    -6.1934,
+    106.8821,
+    TRUE,
+    TRUE
+  ) ON CONFLICT DO NOTHING;
+
+  -- 2. Demo Tenant Baru (Belum Onboarding - untuk test registrasi)
+  INSERT INTO tenants (id, name, activation_code, address, onboarding_completed, is_active)
+  VALUES (
+    'b0000000-0000-0000-0000-000000000002',
+    'SMAN 1 Bekasi',
+    'SPEC-SMAN1BKS',
+    'Jl. KH Agus Salim No.181, Bekasi Timur',
+    FALSE,
+    TRUE
+  ) ON CONFLICT DO NOTHING;
+
+  -- 3. Panel Listrik Demo
+  INSERT INTO panels (id, tenant_id, name, location_label, floor_x, floor_y)
+  VALUES 
+    ('c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'Panel Distribusi Utama (MDB)', 'Gedung Rektorat Lt.1', 28.5, 38.0),
+    ('c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', 'Panel Laboratorium Komputer', 'Gedung Sains Lt.2', 64.0, 32.5),
+    ('c0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000001', 'Panel Aula & Sound System', 'Gedung Serbaguna Lt.1', 78.0, 68.0)
+  ON CONFLICT DO NOTHING;
+
+  -- 4. Initial Sensor Readings
+  INSERT INTO sensor_readings (panel_id, tenant_id, voltage, current_a, power, temperature_panel, temperature_ambient, frequency, power_factor, arc_detected, status)
+  VALUES
+    ('c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 221.4, 18.2, 3820.0, 41.5, 29.0, 50.0, 0.94, FALSE, 'normal'),
+    ('c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', 217.8, 24.6, 5100.0, 58.2, 31.0, 49.8, 0.89, FALSE, 'warning'),
+    ('c0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000001', 220.0, 9.1, 1900.0, 37.8, 28.5, 50.1, 0.96, FALSE, 'normal')
+  ON CONFLICT DO NOTHING;
+
+════════════════════════════════════════════════════════════
+5.8 — TYPESCRIPT TYPES (lib/types/index.ts)
+════════════════════════════════════════════════════════════
+
+File: lib/types/index.ts
+
+```typescript
+export type PanelStatus = 'normal' | 'warning' | 'danger'
+export type UserRole = 'admin' | 'operator'
+
+export interface Tenant {
+  id: string
+  name: string
+  activation_code: string
+  address: string | null
+  latitude: number | null
+  longitude: number | null
+  onboarding_completed: boolean
+  is_active: boolean
+  created_at: string
+}
+
+export interface Profile {
+  id: string
+  full_name: string
+  role: UserRole
+  tenant_id: string
+  created_at: string
+}
+
+export interface Panel {
+  id: string
+  tenant_id: string
+  name: string
+  location_label: string | null
+  floor_x: number
+  floor_y: number
+  is_active: boolean
+  created_at: string
+}
+
+export interface SensorReading {
+  id: string
+  panel_id: string
+  tenant_id: string
+  voltage: number
+  current_a: number
+  power: number
+  temperature_panel: number
+  temperature_ambient: number
+  frequency: number | null
+  power_factor: number | null
+  arc_detected: boolean
+  status: PanelStatus
+  created_at: string
+}
+
+export interface Alert {
+  id: string
+  panel_id: string
+  tenant_id: string
+  status: 'warning' | 'danger'
+  message: string
+  pln_dispatched: boolean
+  acknowledged: boolean
+  created_at: string
+}
+
+export interface PanelWithReading extends Panel {
+  latest_reading: SensorReading | null
+}
+
+export interface PlnEmergencyPayload {
+  panel_id: string
+  tenant_id: string
+  panel_name: string
+  school_name: string
+  address: string
+  coordinates: { lat: number | null; lng: number | null }
+  danger_reason: string
+  current_voltage: number
+  current_temp: number
+}
+```
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 6 — SUPABASE CLIENT SETUP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+════════════════════════════════════════════════════════════
+6.1 — lib/supabase/client.ts (Browser Client)
+════════════════════════════════════════════════════════════
+
+```typescript
+import { createBrowserClient } from '@supabase/ssr'
+
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+6.2 — lib/supabase/server.ts (Server Client & Admin Helper)
+════════════════════════════════════════════════════════════
+
+```typescript
+import { createServerClient } from '@supabase/ssr'
+import { createClient as createSupabaseAdminClient } from '@supabase/supabase-js'
+import { cookies } from 'next/headers'
+
+export function createClient() {
+  const cookieStore = cookies()
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+        set(name: string, value: string, options: Record<string, unknown>) {
+          try {
+            cookieStore.set({ name, value, ...options })
+          } catch {}
+        },
+        remove(name: string, options: Record<string, unknown>) {
+          try {
+            cookieStore.set({ name, value: '', ...options })
+          } catch {}
+        },
+      },
+    }
+  )
+}
+
+export function createAdminClient() {
+  return createSupabaseAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+6.3 — lib/utils.ts (Helper Utilities)
+════════════════════════════════════════════════════════════
+
+```typescript
+import { PanelStatus } from '@/lib/types'
+
+export function getStatusLabel(status: PanelStatus): string {
+  const map: Record<PanelStatus, string> = {
+    normal: 'Normal',
+    warning: 'Waspada',
+    danger: 'Bahaya Kritis',
+  }
+  return map[status] || 'Normal'
+}
+
+export function fmt(value: number | null | undefined, unit = ''): string {
+  if (value === null || value === undefined || isNaN(value)) return '--'
+  return `${value.toFixed(1)}${unit ? ' ' + unit : ''}`
+}
+
+export function formatTimestamp(iso: string): string {
+  if (!iso) return '--'
+  const d = new Date(iso)
+  const time = d.toLocaleTimeString('id-ID', { hour12: false })
+  const date = d.toLocaleDateString('id-ID')
+  return `${time} WIB (${date})`
+}
+```
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 7 — DESIGN SYSTEM & TOKENS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+════════════════════════════════════════════════════════════
+7.1 — app/globals.css
+════════════════════════════════════════════════════════════
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-base: #06080F;
+  --bg-surface: #0E121E;
+  --bg-elevated: #161D2F;
+
+  --border: #1E293B;
+  --border-strong: #334155;
+
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+
+  --blue: #2563EB;
+  --blue-hover: #1D4ED8;
+  --blue-glow: rgba(37, 99, 235, 0.25);
+
+  --cyan: #06B6D4;
+  --cyan-glow: rgba(6, 182, 212, 0.2);
+
+  --status-normal: #10B981;
+  --status-normal-glow: rgba(16, 185, 129, 0.2);
+  --status-warning: #F59E0B;
+  --status-warning-glow: rgba(245, 158, 11, 0.2);
+  --status-danger: #EF4444;
+  --status-danger-glow: rgba(239, 68, 68, 0.3);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+@keyframes pulse-danger {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  50% { transform: scale(1.18); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+}
+
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.animate-pulse-danger {
+  animation: pulse-danger 1.5s infinite;
+}
+
+.animate-pulse-live {
+  animation: pulse-live 2s infinite;
+}
+```
+
+════════════════════════════════════════════════════════════
+7.2 — tailwind.config.ts
+════════════════════════════════════════════════════════════
+
+```typescript
+import type { Config } from 'tailwindcss'
+
+const config: Config = {
+  content: [
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        spectra: {
+          base: '#06080F',
+          surface: '#0E121E',
+          elevated: '#161D2F',
+          border: '#1E293B',
+          'border-strong': '#334155',
+          blue: '#2563EB',
+          cyan: '#06B6D4',
+          normal: '#10B981',
+          warning: '#F59E0B',
+          danger: '#EF4444',
+        },
+      },
+    },
+  },
+  plugins: [],
+}
+
+export default config
+```
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 8 — MIDDLEWARE (middleware.ts)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+```typescript
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({
+    request: { headers: request.headers },
+  })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value
+        },
+        set(name: string, value: string, options: Record<string, unknown>) {
+          request.cookies.set({ name, value, ...options } as Parameters<typeof request.cookies.set>[0])
+          response = NextResponse.next({ request: { headers: request.headers } })
+          response.cookies.set({ name, value, ...options } as Parameters<typeof response.cookies.set>[0])
+        },
+        remove(name: string, options: Record<string, unknown>) {
+          request.cookies.set({ name, value, '', ...options } as Parameters<typeof request.cookies.set>[0])
+          response = NextResponse.next({ request: { headers: request.headers } })
+          response.cookies.set({ name, value, '', ...options } as Parameters<typeof response.cookies.set>[0])
+        },
+      },
+    }
+  )
+
+  const { data: { session } } = await supabase.auth.getSession()
+  const { pathname } = request.nextUrl
+
+  if (pathname === '/') {
+    return NextResponse.redirect(new URL(session ? '/dashboard' : '/login', request.url))
+  }
+
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/onboarding')) {
+    if (!session) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+  }
+
+  if (pathname === '/login') {
+    if (session) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+  }
+
+  return response
+}
+
+export const config = {
+  matcher: ['/', '/login', '/dashboard/:path*', '/onboarding/:path*'],
+}
+```
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 9 — API ROUTES (IMPLEMENTASI LENGKAP)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+════════════════════════════════════════════════════════════
+9.1 — POST /api/auth/login
+════════════════════════════════════════════════════════════
+
+File: `app/api/auth/login/route.ts`
+
+```typescript
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+
+export async function POST(request: Request) {
+  try {
+    const { email, password } = await request.json()
+
+    if (!email || !password) {
+      return NextResponse.json({ data: null, error: 'Email dan kata sandi wajib diisi.' }, { status: 400 })
+    }
+
+    const supabase = createClient()
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (authError || !authData.user) {
+      return NextResponse.json({ data: null, error: 'Email atau kata sandi tidak valid.' }, { status: 401 })
+    }
+
+    const adminClient = createAdminClient()
+    const { data: profile, error: profileError } = await adminClient
+      .from('profiles')
+      .select('full_name, role, tenant_id, tenants(id, name, onboarding_completed, is_active)')
+      .eq('id', authData.user.id)
+      .single()
+
+    if (profileError || !profile) {
+      return NextResponse.json({ data: null, error: 'Profil sekolah tidak ditemukan.' }, { status: 404 })
+    }
+
+    const tenant = (profile as any).tenants
+    if (tenant && !tenant.is_active) {
+      await supabase.auth.signOut()
+      return NextResponse.json({ data: null, error: 'Akun sekolah sedang non-aktif. Hubungi administrator.' }, { status: 403 })
+    }
+
+    return NextResponse.json({
+      data: {
+        userId: authData.user.id,
+        fullName: profile.full_name,
+        role: profile.role,
+        tenantId: profile.tenant_id,
+        tenantName: tenant?.name ?? '',
+        onboardingCompleted: tenant?.onboarding_completed ?? false,
+      },
+      error: null,
+    })
+  } catch (error) {
+    return NextResponse.json({ data: null, error: 'Terjadi kesalahan internal server.' }, { status: 500 })
+  }
+}
+```
+
+════════════════════════════════════════════════════════════
+9.2 — POST /api/auth/signup
+════════════════════════════════════════════════════════════
+
+File: `app/api/auth/signup/route.ts`
+
+```typescript
+import { createAdminClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+
+export async function POST(request: Request) {
+  try {
+    const { fullName, email, password, activationCode } = await request.json()
+
+    if (!fullName || !email || !password || !activationCode) {
+      return NextResponse.json({ data: null, error: 'Seluruh field dan Kode Aktivasi wajib diisi.' }, { status: 400 })
+    }
+
+    const admin = createAdminClient()
+    const cleanCode = activationCode.trim().toUpperCase()
+
+    // 1. Verifikasi Kode Aktivasi Perangkat Fisik (Tenant)
+    const { data: tenant, error: tenantError } = await admin
+      .from('tenants')
+      .select('id, name, onboarding_completed, is_active')
+      .eq('activation_code', cleanCode)
+      .single()
+
+    if (tenantError || !tenant) {
+      return NextResponse.json({ data: null, error: 'Kode Aktivasi Perangkat tidak valid atau tidak terdaftar.' }, { status: 404 })
+    }
+
+    if (!tenant.is_active) {
+      return NextResponse.json({ data: null, error: 'Kode Aktivasi ini telah dinonaktifkan.' }, { status: 403 })
+    }
+
+    // 2. Buat Pengguna di Supabase Auth
+    const { data: authUser, error: authError } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { full_name: fullName },
+    })
+
+    if (authError || !authUser.user) {
+      return NextResponse.json({ data: null, error: authError?.message || 'Gagal mendaftarkan akun.' }, { status: 400 })
+    }
+
+    // 3. Hubungkan profil ke Tenant
+    const { error: profileError } = await admin
+      .from('profiles')
+      .insert({
+        id: authUser.user.id,
+        full_name: fullName,
+        role: 'operator',
+        tenant_id: tenant.id,
+      })
+
+    if (profileError) {
+      return NextResponse.json({ data: null, error: 'Gagal mengaitkan akun dengan data sekolah.' }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      data: {
+        userId: authUser.user.id,
+        tenantId: tenant.id,
+        tenantName: tenant.name,
+        onboardingCompleted: tenant.onboarding_completed,
+      },
+      error: null,
+    })
+  } catch (error) {
+    return NextResponse.json({ data: null, error: 'Terjadi kegagalan server saat pendaftaran.' }, { status: 500 })
+  }
+}
+```
+
+════════════════════════════════════════════════════════════
+9.3 — POST /api/auth/logout
+════════════════════════════════════════════════════════════
+
+File: `app/api/auth/logout/route.ts`
+
+```typescript
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+
+export async function POST() {
+  const supabase = createClient()
+  await supabase.auth.signOut()
+  return NextResponse.json({ data: null, error: null })
+}
+```
+
+════════════════════════════════════════════════════════════
+9.4 — POST /api/onboarding/claim
+════════════════════════════════════════════════════════════
+
+File: `app/api/onboarding/claim/route.ts`
+
+```typescript
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+
+export async function POST(request: Request) {
+  try {
+    const { schoolName, address, latitude, longitude } = await request.json()
+    const supabase = createClient()
+
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      return NextResponse.json({ data: null, error: 'Sesi tidak sah.' }, { status: 401 })
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('tenant_id')
+      .eq('id', session.user.id)
+      .single()
+
+    if (!profile) {
+      return NextResponse.json({ data: null, error: 'Profil tidak ditemukan.' }, { status: 404 })
+    }
+
+    const { error: updateError } = await supabase
+      .from('tenants')
+      .update({
+        name: schoolName,
+        address: address,
+        latitude: parseFloat(latitude) || null,
+        longitude: parseFloat(longitude) || null,
+        onboarding_completed: true,
+      })
+      .eq('id', profile.tenant_id)
+
+    if (updateError) {
+      return NextResponse.json({ data: null, error: updateError.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ data: { success: true }, error: null })
+  } catch (error) {
+    return NextResponse.json({ data: null, error: 'Gagal menyelesaikan onboarding.' }, { status: 500 })
+  }
+}
+```
+
+════════════════════════════════════════════════════════════
+9.5 — GET /api/panels & POST /api/panels
+════════════════════════════════════════════════════════════
+
+File: `app/api/panels/route.ts`
+
+```typescript
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+
+export async function GET() {
+  const supabase = createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+
+  const { data, error } = await supabase
+    .from('panels')
+    .select('*')
+    .eq('is_active', true)
+    .order('name', { ascending: true })
+
+  if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 })
+  return NextResponse.json({ data, error: null })
+}
+
+export async function POST(request: Request) {
+  const supabase = createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+
+  const { name, location_label, floor_x, floor_y } = await request.json()
+  const { data: profile } = await supabase.from('profiles').select('tenant_id').eq('id', session.user.id).single()
+
+  if (!profile) return NextResponse.json({ data: null, error: 'Profile not found' }, { status: 404 })
+
+  const { data, error } = await supabase
+    .from('panels')
+    .insert({
+      tenant_id: profile.tenant_id,
+      name,
+      location_label,
+      floor_x: floor_x ?? 50.0,
+      floor_y: floor_y ?? 50.0,
+    })
+    .select()
+    .single()
+
+  if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 })
+  return NextResponse.json({ data, error: null })
+}
+```
+
+════════════════════════════════════════════════════════════
+9.6 — PATCH /api/panels/update-position
+════════════════════════════════════════════════════════════
+
+File: `app/api/panels/update-position/route.ts`
+
+```typescript
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+
+export async function PATCH(request: Request) {
+  try {
+    const { panelId, floor_x, floor_y } = await request.json()
+    const supabase = createClient()
+
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+
+    const { data, error } = await supabase
+      .from('panels')
+      .update({
+        floor_x: Math.max(0, Math.min(100, floor_x)),
+        floor_y: Math.max(0, Math.min(100, floor_y)),
+      })
+      .eq('id', panelId)
+      .select()
+      .single()
+
+    if (error) return NextResponse.json({ data: null, error: error.message }, { status: 500 })
+    return NextResponse.json({ data, error: null })
+  } catch (error) {
+    return NextResponse.json({ data: null, error: 'Gagal memperbarui posisi node' }, { status: 500 })
+  }
+}
+```
+
+════════════════════════════════════════════════════════════
+9.7 — GET /api/readings/latest
+════════════════════════════════════════════════════════════
+
+File: `app/api/readings/latest/route.ts`
+
+```typescript
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+
+export async function GET() {
+  const supabase = createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+
+  const { data: panels, error: panelsError } = await supabase
+    .from('panels')
+    .select('*')
+    .eq('is_active', true)
+    .order('name', { ascending: true })
+
+  if (panelsError || !panels) {
+    return NextResponse.json({ data: null, error: panelsError?.message || 'Error' }, { status: 500 })
+  }
+
+  const panelsWithReadings = await Promise.all(
+    panels.map(async (panel) => {
+      const { data: reading } = await supabase
+        .from('sensor_readings')
+        .select('*')
+        .eq('panel_id', panel.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      return {
+        ...panel,
+        latest_reading: reading || null,
+      }
+    })
+  )
+
+  return NextResponse.json({ data: panelsWithReadings, error: null })
+}
+```
+
+════════════════════════════════════════════════════════════
+9.8 — POST /api/emergency/pln
+════════════════════════════════════════════════════════════
+
+File: `app/api/emergency/pln/route.ts`
+
+```typescript
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+
+export async function POST(request: Request) {
+  try {
+    const payload = await request.json()
+    const supabase = createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+
+    const admin = createAdminClient()
+
+    // 1. Catat ke tabel alerts
+    const { error: alertError } = await admin
+      .from('alerts')
+      .insert({
+        panel_id: payload.panel_id,
+        tenant_id: payload.tenant_id,
+        status: 'danger',
+        message: `DISPATCH PLN: ${payload.danger_reason || 'Bahaya Anomali Arus/Suhu Kritis'} pada ${payload.panel_name}`,
+        pln_dispatched: true,
+      })
+
+    // 2. Mocking Call ke PLN API Gateway
+    const mockTicketId = `PLN-${Date.now().toString().slice(-6)}`
+
+    return NextResponse.json({
+      data: {
+        success: true,
+        ticketId: mockTicketId,
+        message: 'Laporan darurat berhasil didispatch ke Posko PLN Terdekat.',
+        dispatchedAt: new Date().toISOString(),
+      },
+      error: null,
+    })
+  } catch (error) {
+    return NextResponse.json({ data: null, error: 'Gagal mengirim sinyal darurat PLN.' }, { status: 500 })
+  }
+}
+```
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 10 — UI & AUTHENTICATION GATEWAY (/login)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+════════════════════════════════════════════════════════════
+10.1 — app/(auth)/login/page.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import ElectricalBackground from '@/components/auth/ElectricalBackground'
+import AuthGatewayCard from '@/components/auth/AuthGatewayCard'
+
+export default function LoginPage() {
+  return (
+    <main className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[--bg-base]">
+      {/* Layer 0: Three.js WebGL Electrical Simulation */}
+      <ElectricalBackground />
+
+      {/* Layer 1: Dark Vignette Radial Mask */}
+      <div
+        className="fixed inset-0 z-10 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse at center, transparent 30%, #06080F 95%)',
+        }}
+      />
+
+      {/* Layer 2: Centered Glassmorphic Gateway Card */}
+      <div className="relative z-20 w-full max-w-[440px] px-4 my-8">
+        <AuthGatewayCard />
+      </div>
+    </main>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+10.2 — components/auth/ElectricalBackground.tsx (Three.js WebGL)
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import { useEffect, useRef } from 'react'
+import * as THREE from 'three'
+
+export default function ElectricalBackground() {
+  const mountRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!mountRef.current) return
+
+    const scene = new THREE.Scene()
+    const aspect = window.innerWidth / window.innerHeight
+    const camera = new THREE.OrthographicCamera(-aspect, aspect, 1, -1, 0.1, 100)
+    camera.position.z = 5
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+    renderer.setClearColor(0x06080f, 1)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    mountRef.current.appendChild(renderer.domElement)
+
+    const PARTICLE_COUNT = 65
+    const positions = new Float32Array(PARTICLE_COUNT * 3)
+    const velocities: THREE.Vector2[] = []
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * aspect * 2.2
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 2.2
+      positions[i * 3 + 2] = 0
+
+      const speed = 0.0007 + Math.random() * 0.0006
+      const angle = Math.random() * Math.PI * 2
+      velocities.push(new THREE.Vector2(Math.cos(angle) * speed, Math.sin(angle) * speed))
+    }
+
+    const particleGeo = new THREE.BufferGeometry()
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    const particleMat = new THREE.PointsMaterial({
+      color: 0x06b6d4,
+      size: 0.022,
+      transparent: true,
+      opacity: 0.85,
+    })
+    const particleMesh = new THREE.Points(particleGeo, particleMat)
+    scene.add(particleMesh)
+
+    const lineMat = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true })
+    const lineGeo = new THREE.BufferGeometry()
+    const lineMesh = new THREE.LineSegments(lineGeo, lineMat)
+    scene.add(lineMesh)
+
+    let sparkActive = false
+    let sparkPair = [0, 1]
+    let sparkTimer = 0
+    let sparkInterval = 2000
+    const clock = new THREE.Clock()
+
+    const animate = () => {
+      const delta = clock.getDelta() * 1000
+      sparkTimer += delta
+
+      if (sparkTimer > sparkInterval && !sparkActive) {
+        sparkActive = true
+        sparkTimer = 0
+        sparkInterval = 1500 + Math.random() * 2000
+        sparkPair = [
+          Math.floor(Math.random() * PARTICLE_COUNT),
+          Math.floor(Math.random() * PARTICLE_COUNT),
+        ]
+        setTimeout(() => { sparkActive = false }, 250)
+      }
+
+      const pos = particleGeo.attributes.position.array as Float32Array
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        pos[i * 3] += velocities[i].x
+        pos[i * 3 + 1] += velocities[i].y
+
+        if (pos[i * 3] > aspect || pos[i * 3] < -aspect) velocities[i].x *= -1
+        if (pos[i * 3 + 1] > 1 || pos[i * 3 + 1] < -1) velocities[i].y *= -1
+      }
+      particleGeo.attributes.position.needsUpdate = true
+
+      const linePositions: number[] = []
+      const lineColors: number[] = []
+      const MAX_DIST = 0.32
+
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        for (let j = i + 1; j < PARTICLE_COUNT; j++) {
+          const dx = pos[i * 3] - pos[j * 3]
+          const dy = pos[i * 3 + 1] - pos[j * 3 + 1]
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          const isSpark = sparkActive && (
+            (sparkPair[0] === i && sparkPair[1] === j) ||
+            (sparkPair[0] === j && sparkPair[1] === i)
+          )
+
+          if (dist < MAX_DIST || isSpark) {
+            const alpha = isSpark ? 1.0 : 1.0 - dist / MAX_DIST
+            const r = isSpark ? 1.0 : 0.02 * alpha
+            const g = isSpark ? 0.9 : 0.71 * alpha
+            const b = isSpark ? 1.0 : 0.83 * alpha
+
+            linePositions.push(pos[i * 3], pos[i * 3 + 1], 0)
+            linePositions.push(pos[j * 3], pos[j * 3 + 1], 0)
+            lineColors.push(r, g, b, r, g, b)
+          }
+        }
+      }
+
+      lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3))
+      lineGeo.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3))
+
+      renderer.render(scene, camera)
+    }
+
+    renderer.setAnimationLoop(animate)
+
+    const handleResize = () => {
+      const w = window.innerWidth
+      const h = window.innerHeight
+      const newAspect = w / h
+      renderer.setSize(w, h)
+      camera.left = -newAspect
+      camera.right = newAspect
+      camera.updateProjectionMatrix()
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      renderer.setAnimationLoop(null)
+      window.removeEventListener('resize', handleResize)
+      particleGeo.dispose()
+      particleMat.dispose()
+      lineGeo.dispose()
+      lineMat.dispose()
+      renderer.dispose()
+      if (mountRef.current) {
+        mountRef.current.innerHTML = ''
+      }
+    }
+  }, [])
+
+  return <div ref={mountRef} className="fixed inset-0 z-0 pointer-events-none" />
+}
+```
+
+════════════════════════════════════════════════════════════
+10.3 — components/auth/AuthGatewayCard.tsx (Tab Switcher)
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import { useState } from 'react'
+import { Zap } from 'lucide-react'
+import LoginForm from './LoginForm'
+import RegisterForm from './RegisterForm'
+
+export default function AuthGatewayCard() {
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login')
+
+  return (
+    <div className="w-full bg-[rgba(14,18,30,0.85)] backdrop-blur-xl border border-[--border] rounded-2xl p-8 shadow-2xl shadow-black/80">
+      {/* Brand Header */}
+      <div className="flex flex-col items-center gap-2 mb-6 text-center">
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/30">
+            <Zap size={24} className="text-[--cyan] animate-pulse" />
+          </div>
+          <span className="text-2xl font-bold tracking-[0.25em] text-white">SPECTRA</span>
+        </div>
+        <p className="text-xs text-[--text-secondary]">
+          Electrical Safety & Command Center Multi-Tenant
+        </p>
+      </div>
+
+      {/* Tabs Switcher */}
+      <div className="grid grid-cols-2 p-1 mb-6 rounded-xl bg-[--bg-elevated] border border-[--border]">
+        <button
+          type="button"
+          onClick={() => setActiveTab('login')}
+          className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+            activeTab === 'login'
+              ? 'bg-[--blue] text-white shadow-lg'
+              : 'text-[--text-secondary] hover:text-white'
+          }`}
+        >
+          Masuk Akun
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('register')}
+          className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+            activeTab === 'register'
+              ? 'bg-[--blue] text-white shadow-lg'
+              : 'text-[--text-secondary] hover:text-white'
+          }`}
+        >
+          Aktivasi Perangkat
+        </button>
+      </div>
+
+      {/* Forms */}
+      {activeTab === 'login' ? <LoginForm /> : <RegisterForm />}
+    </div>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+10.4 — components/ui/Input.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import React from 'react'
+
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string
+  helperText?: string
+  rightElement?: React.ReactNode
+}
+
+export default function Input({ label, helperText, rightElement, id, className = '', ...props }: InputProps) {
+  return (
+    <div className="flex flex-col gap-1.5 w-full">
+      <label htmlFor={id} className="text-xs font-semibold text-[--text-secondary]">
+        {label}
+      </label>
+      <div className="relative flex items-center">
+        <input
+          id={id}
+          className={`w-full h-11 px-3.5 rounded-lg text-sm bg-[--bg-elevated] text-[--text-primary] border border-[--border] placeholder:text-[--text-muted] focus:outline-none focus:border-[--blue] focus:ring-2 focus:ring-[--blue-glow] transition-all disabled:opacity-50 ${
+            rightElement ? 'pr-11' : ''
+          } ${className}`}
+          {...props}
+        />
+        {rightElement && <div className="absolute right-3 flex items-center">{rightElement}</div>}
+      </div>
+      {helperText && <p className="text-[11px] text-[--text-muted]">{helperText}</p>}
+    </div>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+10.5 — components/ui/Button.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import React from 'react'
+
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'danger' | 'ghost'
+  children: React.ReactNode
+}
+
+export default function Button({ variant = 'primary', children, className = '', ...props }: ButtonProps) {
+  const base = 'h-11 px-4 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed'
+  
+  const variants = {
+    primary: 'bg-[--blue] hover:bg-[--blue-hover] text-white shadow-lg shadow-blue-500/20 active:scale-[0.98]',
+    danger: 'bg-[--status-danger] hover:bg-red-600 text-white shadow-lg shadow-red-500/20 active:scale-[0.98]',
+    ghost: 'bg-transparent hover:bg-[--bg-elevated] text-[--text-secondary] hover:text-white border border-[--border]',
+  }
+
+  return (
+    <button className={`${base} ${variants[variant]} ${className}`} {...props}>
+      {children}
+    </button>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+10.6 — components/auth/LoginForm.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Eye, EyeOff, AlertCircle } from 'lucide-react'
+import Input from '@/components/ui/Input'
+import Button from '@/components/ui/Button'
+
+export default function LoginForm() {
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    if (!email || !password) {
+      setError('Email dan kata sandi wajib diisi.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const json = await res.json()
+
+      if (!res.ok) {
+        setError(json.error || 'Login gagal.')
+        return
+      }
+
+      if (json.data.onboardingCompleted) {
+        router.push('/dashboard')
+      } else {
+        router.push('/onboarding')
+      }
+    } catch {
+      setError('Gagal terhubung ke server.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleLogin} className="flex flex-col gap-4">
+      <Input
+        id="login-email"
+        type="email"
+        label="Email Staf / Operator"
+        placeholder="operator@sekolah.sch.id"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={loading}
+      />
+      <Input
+        id="login-password"
+        type={showPassword ? 'text' : 'password'}
+        label="Kata Sandi"
+        placeholder="••••••••"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        disabled={loading}
+        rightElement={
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="text-[--text-muted] hover:text-white"
+          >
+            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        }
+      />
+
+      {error && (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-[--status-danger]">
+          <AlertCircle size={15} />
+          <span>{error}</span>
+        </div>
+      )}
+
+      <Button type="submit" disabled={loading} className="w-full mt-2">
+        {loading ? 'Memvalidasi...' : 'Masuk ke Dashboard'}
+      </Button>
+    </form>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+10.7 — components/auth/RegisterForm.tsx (Klaim Kode Aktivasi)
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { KeyRound, AlertCircle } from 'lucide-react'
+import Input from '@/components/ui/Input'
+import Button from '@/components/ui/Button'
+
+export default function RegisterForm() {
+  const router = useRouter()
+  const [fullName, setFullName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [activationCode, setActivationCode] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    if (!fullName || !email || !password || !activationCode) {
+      setError('Semua kolom dan Kode Aktivasi wajib diisi.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName, email, password, activationCode }),
+      })
+      const json = await res.json()
+
+      if (!res.ok) {
+        setError(json.error || 'Pendaftaran gagal.')
+        return
+      }
+
+      // Login otomatis lalu direct ke onboarding
+      const loginRes = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+
+      if (loginRes.ok) {
+        router.push('/onboarding')
+      } else {
+        router.push('/login')
+      }
+    } catch {
+      setError('Gagal menghubungi server pendaftaran.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleRegister} className="flex flex-col gap-3.5">
+      <Input
+        id="reg-code"
+        type="text"
+        label="Kode Aktivasi Perangkat (Tenant ID)"
+        placeholder="Contoh: SPEC-SMAN1BKS"
+        value={activationCode}
+        onChange={(e) => setActivationCode(e.target.value.toUpperCase())}
+        disabled={loading}
+        helperText="Tertera pada label fisik box unit kontrol ESP32"
+        rightElement={<KeyRound size={16} className="text-[--cyan]" />}
+      />
+      <Input
+        id="reg-name"
+        type="text"
+        label="Nama Lengkap Penanggung Jawab"
+        placeholder="Budi Santoso, S.T."
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
+        disabled={loading}
+      />
+      <Input
+        id="reg-email"
+        type="email"
+        label="Email Akun"
+        placeholder="admin.sarpras@sekolah.sch.id"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={loading}
+      />
+      <Input
+        id="reg-pass"
+        type="password"
+        label="Kata Sandi Baru"
+        placeholder="••••••••"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        disabled={loading}
+      />
+
+      {error && (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-[--status-danger]">
+          <AlertCircle size={15} />
+          <span>{error}</span>
+        </div>
+      )}
+
+      <Button type="submit" disabled={loading} className="w-full mt-2">
+        {loading ? 'Memproses Aktivasi...' : 'Aktivasi & Mulai Setup'}
+      </Button>
+    </form>
+  )
+}
+```
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 11 — DEVICE ONBOARDING & SETUP PETA (/onboarding)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+════════════════════════════════════════════════════════════
+11.1 — app/(onboarding)/onboarding/page.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+import OnboardingWizard from '@/components/onboarding/OnboardingWizard'
+
+export default function OnboardingPage() {
+  return (
+    <main className="min-h-screen w-full flex items-center justify-center p-6 bg-[--bg-base]">
+      <div className="w-full max-w-2xl bg-[--bg-surface] border border-[--border] rounded-2xl p-8 shadow-2xl">
+        <OnboardingWizard />
+      </div>
+    </main>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+11.2 — components/onboarding/SchoolMapSetup.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import Input from '@/components/ui/Input'
+import { MapPin } from 'lucide-react'
+
+interface MapSetupProps {
+  schoolName: string
+  setSchoolName: (val: string) => void
+  address: string
+  setAddress: (val: string) => void
+  latitude: string
+  setLatitude: (val: string) => void
+  longitude: string
+  setLongitude: (val: string) => void
+}
+
+export default function SchoolMapSetup({
+  schoolName,
+  setSchoolName,
+  address,
+  setAddress,
+  latitude,
+  setLatitude,
+  longitude,
+  setLongitude,
+}: MapSetupProps) {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-[--text-secondary]">
+        Atur lokasi geografis sekolah Anda untuk integrasi dispatch darurat PLN terdekat.
+      </div>
+      <Input
+        id="onboard-school-name"
+        label="Nama Resmi Instansi / Sekolah"
+        value={schoolName}
+        onChange={(e) => setSchoolName(e.target.value)}
+        placeholder="SMAN 1 Jakarta"
+      />
+      <Input
+        id="onboard-address"
+        label="Alamat Lengkap Gedung Sekolah"
+        value={address}
+        onChange={(e) => setAddress(e.target.value)}
+        placeholder="Jl. Budi Utomo No.7, Pasar Baru"
+      />
+      <div className="grid grid-cols-2 gap-3">
+        <Input
+          id="onboard-lat"
+          label="Latitude (GPS)"
+          value={latitude}
+          onChange={(e) => setLatitude(e.target.value)}
+          placeholder="-6.1934"
+          rightElement={<MapPin size={16} className="text-[--cyan]" />}
+        />
+        <Input
+          id="onboard-lng"
+          label="Longitude (GPS)"
+          value={longitude}
+          onChange={(e) => setLongitude(e.target.value)}
+          placeholder="106.8821"
+          rightElement={<MapPin size={16} className="text-[--cyan]" />}
+        />
+      </div>
+    </div>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+11.3 — components/onboarding/DeviceVerificationStep.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import { Cpu, CheckCircle2 } from 'lucide-react'
+
+export default function DeviceVerificationStep() {
+  return (
+    <div className="flex flex-col gap-4 py-2">
+      <div className="p-4 rounded-xl bg-[--bg-elevated] border border-[--border] flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-lg bg-[--cyan-glow] text-[--cyan]">
+            <Cpu size={22} />
+          </div>
+          <div>
+            <h4 className="text-sm font-semibold text-white">Modul Kontrol ESP32-S3</h4>
+            <p className="text-xs text-[--text-muted]">Edge Processing Unit (FFT Arc Detection)</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 text-xs text-[--status-normal] font-semibold">
+          <CheckCircle2 size={16} />
+          <span>Siap Dihubungkan</span>
+        </div>
+      </div>
+      <p className="text-xs text-[--text-secondary]">
+        Setelah proses ini selesai, panel distribusi dapat dipetakan langsung pada denah digital interaktif di Command Center.
+      </p>
+    </div>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+11.4 — components/onboarding/OnboardingWizard.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Button from '@/components/ui/Button'
+import SchoolMapSetup from './SchoolMapSetup'
+import DeviceVerificationStep from './DeviceVerificationStep'
+
+export default function OnboardingWizard() {
+  const router = useRouter()
+  const [step, setStep] = useState(1)
+  const [schoolName, setSchoolName] = useState('')
+  const [address, setAddress] = useState('')
+  const [latitude, setLatitude] = useState('-6.2088')
+  const [longitude, setLongitude] = useState('106.8456')
+  const [loading, setLoading] = useState(false)
+
+  const handleFinish = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/onboarding/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ schoolName, address, latitude, longitude }),
+      })
+      if (res.ok) {
+        router.push('/dashboard')
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="border-b border-[--border] pb-4">
+        <h2 className="text-lg font-bold text-white">Setup Onboarding Sekolah</h2>
+        <p className="text-xs text-[--text-secondary]">Langkah {step} dari 2</p>
+      </div>
+
+      {step === 1 ? (
+        <SchoolMapSetup
+          schoolName={schoolName}
+          setSchoolName={setSchoolName}
+          address={address}
+          setAddress={setAddress}
+          latitude={latitude}
+          setLatitude={setLatitude}
+          longitude={longitude}
+          setLongitude={setLongitude}
+        />
+      ) : (
+        <DeviceVerificationStep />
+      )}
+
+      <div className="flex justify-between items-center pt-4 border-t border-[--border]">
+        {step > 1 ? (
+          <Button variant="ghost" onClick={() => setStep(step - 1)}>
+            Kembali
+          </Button>
+        ) : <div />}
+
+        {step === 1 ? (
+          <Button onClick={() => setStep(2)} disabled={!schoolName || !address}>
+            Lanjut ke Verifikasi Perangkat
+          </Button>
+        ) : (
+          <Button onClick={handleFinish} disabled={loading}>
+            {loading ? 'Menyimpan Konfigurasi...' : 'Selesaikan & Buka Dashboard'}
+          </Button>
+        )}
+      </div>
+    </div>
+  )
+}
+```
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 12 — COMMAND CENTER DASHBOARD (/dashboard)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+════════════════════════════════════════════════════════════
+12.1 — app/(dashboard)/dashboard/page.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import { useState, useEffect } from 'react'
+import InteractiveFloorPlan from '@/components/dashboard/InteractiveFloorPlan'
+import SidebarMetrics from '@/components/dashboard/SidebarMetrics'
+import { PanelWithReading, SensorReading } from '@/lib/types'
+import { createClient } from '@/lib/supabase/client'
+
+export default function DashboardPage() {
+  const [panels, setPanels] = useState<PanelWithReading[]>([])
+  const [selectedPanelId, setSelectedPanelId] = useState<string | null>(null)
+
+  // 1. Initial Load
+  useEffect(() => {
+    fetch('/api/readings/latest')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.data) {
+          setPanels(json.data)
+          if (json.data.length > 0) setSelectedPanelId(json.data[0].id)
+        }
+      })
+  }, [])
+
+  // 2. Supabase Realtime Subscription
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel('realtime-readings')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'sensor_readings' },
+        (payload) => {
+          const reading = payload.new as SensorReading
+          setPanels((prev) =>
+            prev.map((p) => (p.id === reading.panel_id ? { ...p, latest_reading: reading } : p))
+          )
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
+  const selectedPanel = panels.find((p) => p.id === selectedPanelId) || null
+
+  return (
+    <div className="flex-1 flex overflow-hidden">
+      {/* Area Tengah: Interactive Floor Plan */}
+      <div className="flex-1 p-6 overflow-auto">
+        <InteractiveFloorPlan
+          panels={panels}
+          selectedPanelId={selectedPanelId}
+          onSelectPanel={setSelectedPanelId}
+          onNodeMoved={(id, x, y) => {
+            setPanels((prev) =>
+              prev.map((p) => (p.id === id ? { ...p, floor_x: x, floor_y: y } : p))
+            )
+          }}
+        />
+      </div>
+
+      {/* Area Kanan: Sidebar Metrics & Emergency PLN */}
+      <aside className="w-88 border-l border-[--border] bg-[--bg-surface] flex-shrink-0">
+        <SidebarMetrics panel={selectedPanel} />
+      </aside>
+    </div>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+12.2 — components/dashboard/Navbar.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import { Zap, LogOut } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+
+interface NavbarProps {
+  tenantName: string
+  userFullName: string
+  isConnected: boolean
+}
+
+export default function Navbar({ tenantName, userFullName, isConnected }: NavbarProps) {
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' })
+    router.push('/login')
+  }
+
+  return (
+    <header className="sticky top-0 z-50 h-16 border-b border-[--border] bg-[rgba(6,8,15,0.9)] backdrop-blur-md px-6 flex items-center justify-between">
+      {/* Brand */}
+      <div className="flex items-center gap-3">
+        <div className="p-1.5 rounded-lg bg-blue-500/10 border border-blue-500/30">
+          <Zap size={18} className="text-[--cyan]" />
+        </div>
+        <span className="font-bold tracking-[0.2em] text-white">SPECTRA</span>
+      </div>
+
+      {/* Tenant Name */}
+      <div className="text-sm font-semibold text-[--text-secondary] hidden md:block">
+        {tenantName || 'Tenant Sekolah'}
+      </div>
+
+      {/* Right Controls */}
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[--bg-elevated] border border-[--border]">
+          <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-[--status-normal] animate-pulse-live' : 'bg-red-500'}`} />
+          <span className="text-xs text-[--text-secondary]">{isConnected ? 'Live Telemetry' : 'Offline'}</span>
+        </div>
+
+        <span className="text-xs text-white hidden sm:block">{userFullName}</span>
+
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-1.5 text-xs text-[--text-secondary] hover:text-red-400 transition-colors"
+        >
+          <LogOut size={16} />
+          <span className="hidden sm:inline">Keluar</span>
+        </button>
+      </div>
+    </header>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+12.3 — components/dashboard/InteractiveFloorPlan.tsx (Drag & Drop)
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import { useRef } from 'react'
+import { PanelWithReading } from '@/lib/types'
+import PanelNode from './PanelNode'
+
+interface FloorPlanProps {
+  panels: PanelWithReading[]
+  selectedPanelId: string | null
+  onSelectPanel: (id: string) => void
+  onNodeMoved: (id: string, x: number, y: number) => void
+}
+
+export default function InteractiveFloorPlan({
+  panels,
+  selectedPanelId,
+  onSelectPanel,
+  onNodeMoved,
+}: FloorPlanProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+  }
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault()
+    if (!containerRef.current) return
+
+    const panelId = e.dataTransfer.getData('panelId')
+    if (!panelId) return
+
+    const rect = containerRef.current.getBoundingClientRect()
+    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100))
+    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100))
+
+    onNodeMoved(panelId, x, y)
+
+    await fetch('/api/panels/update-position', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ panelId, floor_x: x, floor_y: y }),
+    })
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      className="relative w-full rounded-2xl overflow-hidden border border-[--border] bg-[#0E121E] shadow-2xl select-none"
+      style={{ aspectRatio: '16/9' }}
+    >
+      <img
+        src="/floor-plan-placeholder.svg"
+        alt="Denah Gedung Sekolah"
+        className="w-full h-full object-cover pointer-events-none opacity-85"
+      />
+
+      {panels.map((panel) => (
+        <PanelNode
+          key={panel.id}
+          panel={panel}
+          isSelected={panel.id === selectedPanelId}
+          onSelect={() => onSelectPanel(panel.id)}
+        />
+      ))}
+    </div>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+12.4 — components/dashboard/PanelNode.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import { PanelWithReading } from '@/lib/types'
+
+interface PanelNodeProps {
+  panel: PanelWithReading
+  isSelected: boolean
+  onSelect: () => void
+}
+
+export default function PanelNode({ panel, isSelected, onSelect }: PanelNodeProps) {
+  const status = panel.latest_reading?.status || 'normal'
+
+  const colorMap = {
+    normal: '#10B981',
+    warning: '#F59E0B',
+    danger: '#EF4444',
+  }
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData('panelId', panel.id)
+  }
+
+  return (
+    <div
+      draggable
+      onDragStart={handleDragStart}
+      onClick={onSelect}
+      title={`${panel.name} (${panel.location_label || 'Tanpa Label'})\nGeser untuk ubah posisi`}
+      style={{
+        position: 'absolute',
+        left: `${panel.floor_x}%`,
+        top: `${panel.floor_y}%`,
+        transform: 'translate(-50%, -50%)',
+      }}
+      className={`cursor-grab active:cursor-grabbing p-1 rounded-full transition-transform ${
+        isSelected ? 'scale-125 z-30' : 'hover:scale-110 z-20'
+      }`}
+    >
+      <div
+        className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center ${
+          status === 'danger' ? 'animate-pulse-danger' : ''
+        }`}
+        style={{
+          backgroundColor: colorMap[status],
+          boxShadow: `0 0 14px ${colorMap[status]}`,
+        }}
+      >
+        <span className="w-1.5 h-1.5 rounded-full bg-white" />
+      </div>
+    </div>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+12.5 — components/dashboard/MetricCard.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import { Zap, Activity, Cpu, Thermometer, Radio } from 'lucide-react'
+
+interface MetricCardProps {
+  label: string
+  value: string
+  unit: string
+  icon: 'zap' | 'activity' | 'cpu' | 'temp' | 'freq'
+  isDanger?: boolean
+}
+
+export default function MetricCard({ label, value, unit, icon, isDanger }: MetricCardProps) {
+  const icons = {
+    zap: <Zap size={16} className={isDanger ? 'text-[--status-danger]' : 'text-[--blue]'} />,
+    activity: <Activity size={16} className={isDanger ? 'text-[--status-danger]' : 'text-[--cyan]'} />,
+    cpu: <Cpu size={16} className={isDanger ? 'text-[--status-danger]' : 'text-[--blue]'} />,
+    temp: <Thermometer size={16} className={isDanger ? 'text-[--status-danger]' : 'text-[--status-warning]'} />,
+    freq: <Radio size={16} className={isDanger ? 'text-[--status-danger]' : 'text-[--text-muted]'} />,
+  }
+
+  return (
+    <div className={`p-3.5 rounded-xl bg-[--bg-elevated] border transition-all flex items-center justify-between ${
+      isDanger ? 'border-red-500/50 bg-red-500/10' : 'border-[--border]'
+    }`}>
+      <div className="flex items-center gap-2.5">
+        <div className="p-2 rounded-lg bg-[--bg-surface]">{icons[icon]}</div>
+        <span className="text-xs text-[--text-secondary] font-medium">{label}</span>
+      </div>
+      <div className="text-right">
+        <span className="font-mono text-base font-bold text-white">{value}</span>
+        <span className="text-[11px] text-[--text-muted] ml-1">{unit}</span>
+      </div>
+    </div>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+12.6 — components/ui/StatusBadge.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import { PanelStatus } from '@/lib/types'
+
+export default function StatusBadge({ status }: { status: PanelStatus }) {
+  const map = {
+    normal: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+    warning: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+    danger: 'bg-red-500/20 text-red-400 border-red-500/40 animate-pulse',
+  }
+  const label = { normal: 'Normal', warning: 'Waspada', danger: 'Bahaya Kritis' }
+
+  return (
+    <span className={`px-2.5 py-1 text-[11px] font-semibold border rounded-full ${map[status]}`}>
+      {label[status]}
+    </span>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+12.7 — components/ui/Modal.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import { X } from 'lucide-react'
+
+interface ModalProps {
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  children: React.ReactNode
+}
+
+export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-2xl bg-[--bg-surface] border border-[--border-strong] p-6 shadow-2xl">
+        <div className="flex items-center justify-between pb-4 border-b border-[--border]">
+          <h3 className="text-base font-bold text-white">{title}</h3>
+          <button onClick={onClose} className="p-1 rounded-lg text-[--text-muted] hover:text-white">
+            <X size={18} />
+          </button>
+        </div>
+        <div className="mt-4">{children}</div>
+      </div>
+    </div>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+12.8 — components/dashboard/PlnEmergencyModal.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import { useState } from 'react'
+import Modal from '@/components/ui/Modal'
+import Button from '@/components/ui/Button'
+import { PhoneCall, Send, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { PanelWithReading } from '@/lib/types'
+
+interface PlnModalProps {
+  isOpen: boolean
+  onClose: () => void
+  panel: PanelWithReading | null
+}
+
+export default function PlnEmergencyModal({ isOpen, onClose, panel }: PlnModalProps) {
+  const [dispatched, setDispatched] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  if (!panel) return null
+
+  const handleDispatch = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/emergency/pln', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          panel_id: panel.id,
+          tenant_id: panel.tenant_id,
+          panel_name: panel.name,
+          danger_reason: panel.latest_reading?.arc_detected ? 'Deteksi Arc Flash Tegangan Tinggi' : 'Kelebihan Beban Kritis',
+        }),
+      })
+      if (res.ok) setDispatched(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Bantuan Darurat Posko PLN 123">
+      <div className="flex flex-col gap-4">
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-start gap-3">
+          <AlertTriangle size={22} className="text-red-400 flex-shrink-0 mt-0.5" />
+          <div className="text-xs">
+            <span className="font-bold text-red-300">Peringatan Bahaya Kebakaran: </span>
+            <span className="text-gray-300">
+              Anomali kelistrikan kritis terdeteksi pada <b>{panel.name}</b>.
+            </span>
+          </div>
+        </div>
+
+        {dispatched ? (
+          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center flex flex-col items-center gap-2">
+            <CheckCircle2 size={28} className="text-emerald-400" />
+            <p className="text-xs font-semibold text-white">Tiket Darurat Berhasil Dikirim ke Posko PLN Terdekat.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <a
+              href="tel:123"
+              className="h-11 px-4 rounded-lg bg-[--bg-elevated] hover:bg-slate-700 border border-[--border] text-xs font-semibold text-white flex items-center justify-center gap-2"
+            >
+              <PhoneCall size={16} className="text-amber-400" />
+              Telepon 123
+            </a>
+            <Button variant="danger" onClick={handleDispatch} disabled={loading}>
+              <Send size={16} />
+              {loading ? 'Mengirim...' : 'Kirim Dispatch'}
+            </Button>
+          </div>
+        )}
+      </div>
+    </Modal>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+12.9 — components/dashboard/SidebarMetrics.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import { useState } from 'react'
+import { PanelWithReading } from '@/lib/types'
+import { fmt, formatTimestamp } from '@/lib/utils'
+import StatusBadge from '@/components/ui/StatusBadge'
+import MetricCard from './MetricCard'
+import PlnEmergencyModal from './PlnEmergencyModal'
+import { AlertCircle } from 'lucide-react'
+
+export default function SidebarMetrics({ panel }: { panel: PanelWithReading | null }) {
+  const [plnModalOpen, setPlnModalOpen] = useState(false)
+
+  if (!panel) {
+    return (
+      <div className="p-8 text-center text-xs text-[--text-muted] flex items-center justify-center h-full">
+        Pilih titik panel listrik pada peta untuk memantau metrik daya.
+      </div>
+    )
+  }
+
+  const r = panel.latest_reading
+  const isDanger = r?.status === 'danger'
+
+  return (
+    <div className="p-6 flex flex-col gap-5 h-full overflow-y-auto">
+      {/* Panel Title & Status */}
+      <div className="flex items-center justify-between border-b border-[--border] pb-4">
+        <div>
+          <h2 className="text-sm font-bold text-white">{panel.name}</h2>
+          <p className="text-xs text-[--text-muted]">{panel.location_label || 'Lokasi Belum Ditentukan'}</p>
+        </div>
+        <StatusBadge status={r?.status || 'normal'} />
+      </div>
+
+      {/* Emergency PLN Trigger Button */}
+      {isDanger && (
+        <button
+          onClick={() => setPlnModalOpen(true)}
+          className="w-full py-2.5 px-4 rounded-xl bg-red-500/20 border border-red-500/40 text-red-300 text-xs font-bold flex items-center justify-center gap-2 hover:bg-red-500/30 transition-all animate-pulse"
+        >
+          <AlertCircle size={16} />
+          Bantuan Darurat PLN
+        </button>
+      )}
+
+      {/* Metric Cards List */}
+      <div className="flex flex-col gap-2.5">
+        <MetricCard label="Tegangan Fase" value={fmt(r?.voltage)} unit="V" icon="zap" />
+        <MetricCard label="Arus Beban" value={fmt(r?.current_a)} unit="A" icon="activity" isDanger={isDanger} />
+        <MetricCard label="Konsumsi Daya" value={fmt(r?.power)} unit="W" icon="cpu" />
+        <MetricCard label="Suhu Busbar / Panel" value={fmt(r?.temperature_panel)} unit="°C" icon="temp" isDanger={(r?.temperature_panel || 0) > 60} />
+        <MetricCard label="Suhu Sekitar (Ambient)" value={fmt(r?.temperature_ambient)} unit="°C" icon="temp" />
+        <MetricCard label="Frekuensi Jaringan" value={fmt(r?.frequency)} unit="Hz" icon="freq" />
+      </div>
+
+      <div className="mt-auto text-[11px] text-[--text-muted] text-center border-t border-[--border] pt-4">
+        Sinkronisasi Terakhir: {formatTimestamp(r?.created_at || '')}
+      </div>
+
+      <PlnEmergencyModal
+        isOpen={plnModalOpen}
+        onClose={() => setPlnModalOpen(false)}
+        panel={panel}
+      />
+    </div>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+12.10 — components/dashboard/DashboardClientLayout.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+'use client'
+
+import { useState, useEffect } from 'react'
+import Navbar from './Navbar'
+import { createClient } from '@/lib/supabase/client'
+
+interface LayoutProps {
+  tenantName: string
+  userFullName: string
+  children: React.ReactNode
+}
+
+export default function DashboardClientLayout({ tenantName, userFullName, children }: LayoutProps) {
+  const [isConnected, setIsConnected] = useState(true)
+
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel('system-liveness')
+      .subscribe((status) => {
+        setIsConnected(status === 'SUBSCRIBED')
+      })
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
+  return (
+    <div className="min-h-screen flex flex-col bg-[--bg-base]">
+      <Navbar tenantName={tenantName} userFullName={userFullName} isConnected={isConnected} />
+      <div className="flex-1 flex overflow-hidden">{children}</div>
+    </div>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+12.11 — app/(dashboard)/layout.tsx
+════════════════════════════════════════════════════════════
+
+```typescript
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import DashboardClientLayout from '@/components/dashboard/DashboardClientLayout'
+
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const supabase = createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+
+  if (!session) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name, tenant_id, tenants(name)')
+    .eq('id', session.user.id)
+    .single()
+
+  const tenantName = (profile as any)?.tenants?.name || ''
+
+  return (
+    <DashboardClientLayout
+      tenantName={tenantName}
+      userFullName={profile?.full_name || 'Operator'}
+    >
+      {children}
+    </DashboardClientLayout>
+  )
+}
+```
+
+════════════════════════════════════════════════════════════
+12.12 — public/floor-plan-placeholder.svg
+════════════════════════════════════════════════════════════
+
+```svg
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#0A0E1A"/>
+  <defs>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="#1E293B" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="900" fill="url(#grid)" opacity="0.4"/>
+  
+  <!-- Gedung Utama -->
+  <rect x="150" y="120" width="480" height="340" rx="12" fill="#131B2E" stroke="#334155" stroke-width="2"/>
+  <text x="180" y="160" fill="#64748B" font-family="sans-serif" font-size="18" font-weight="bold">GEDUNG UTAMA &amp; LAB IT</text>
+
+  <!-- Gedung Rektorat -->
+  <rect x="700" y="120" width="380" height="300" rx="12" fill="#131B2E" stroke="#334155" stroke-width="2"/>
+  <text x="730" y="160" fill="#64748B" font-family="sans-serif" font-size="18" font-weight="bold">GEDUNG REKTORAT</text>
+
+  <!-- Gedung Aula & Olahraga -->
+  <rect x="1140" y="140" width="340" height="480" rx="12" fill="#131B2E" stroke="#334155" stroke-width="2"/>
+  <text x="1170" y="180" fill="#64748B" font-family="sans-serif" font-size="18" font-weight="bold">AULA &amp; SARPRAS</text>
+
+  <!-- Koridor Penghubung -->
+  <path d="M 630 280 L 700 280 M 1080 280 L 1140 280" stroke="#1E293B" stroke-width="8"/>
+</svg>
+```
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 13 — DEPENDENCY & SETUP COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+════════════════════════════════════════════════════════════
+13.1 — PERINTAH INSTALASI
+════════════════════════════════════════════════════════════
+
+```bash
+# 1. Buat Project Next.js 14
+npx create-next-app@latest spectra \
+  --typescript --tailwind --eslint \
+  --app --no-src-dir --import-alias "@/*"
+
+# 2. Masuk ke direktori
+cd spectra
+
+# 3. Instalasi Supabase
+npm install @supabase/supabase-js @supabase/ssr
+
+# 4. Instalasi Three.js WebGL & Types
+npm install three
+npm install --save-dev @types/three
+
+# 5. Instalasi Lucide Icons
+npm install lucide-react
+
+# 6. Jalankan Server Dev
+npm run dev
+```
+
+════════════════════════════════════════════════════════════
+13.2 — REFERENSI package.json
+════════════════════════════════════════════════════════════
+
+```json
+{
+  "name": "spectra",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.48.0",
+    "lucide-react": "^0.475.0",
+    "next": "14.2.23",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.173.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/three": "^0.173.0",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.23",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
+```
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN 14 — CONSTRAINT UNTUK CODE AGENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Kerjakan bertahap mulai dari FASE 1 saja. Jangan melompat sebelum fase aktif lulus uji coba.
+2. Setiap komponen harus dibuat pada file terpisah dalam direktori `components/`.
+3. Komputasi FFT berjalan di firmware ESP32-S3 (Edge Computing), backend menerima status matang ('normal', 'warning', 'danger').
+4. Nilai metrik numerik wajib dibungkus dengan helper `fmt()` untuk mengantisipasi nilai null/undefined.
+5. Gunakan `createAdminClient()` hanya di Server Route Handlers untuk proses verifikasi kode aktivasi dan bypass RLS terkontrol.
+
+================================================================
+END OF DOCUMENT — PRD v2.0 Final Enterprise (Ultra-Detailed)
+SPECTRA | BEEFEST SDLC 2026 | BINUS @Bekasi
+================================================================
