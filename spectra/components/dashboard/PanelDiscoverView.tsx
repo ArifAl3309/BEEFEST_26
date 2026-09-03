@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { PanelWithReading, SensorReading } from '@/lib/types'
-import { fmt, formatTimestamp, formatDateTimeParts } from '@/lib/utils'
+import { fmt, formatDateTimeParts } from '@/lib/utils'
 import StatusBadge from '@/components/ui/StatusBadge'
 import {
   ArrowLeft,

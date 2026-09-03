@@ -39,7 +39,6 @@ export default function InteractiveFloorPlan({
   const [scale, setScale] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isPanning, setIsPanning] = useState(false)
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 })
 
   // Refs untuk sinkronisasi nilai state terkini secara real-time pada event listener
   const transformRef = useRef({ scale: 1, pan: { x: 0, y: 0 } })
