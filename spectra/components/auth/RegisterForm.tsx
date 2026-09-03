@@ -59,9 +59,9 @@ export default function RegisterForm() {
   }
 
   return (
-    <div className="w-full relative overflow-hidden bg-[#0C1222]/90 backdrop-blur-2xl border border-slate-800/90 rounded-[32px] p-8 sm:p-10 shadow-2xl shadow-black/90 transition-all duration-300 hover:border-slate-700/80">
+    <div className="w-full relative overflow-hidden bg-[#0C1222]/90 backdrop-blur-2xl border border-sky-500/20 rounded-[32px] p-8 sm:p-10 shadow-[0_10px_40px_-10px_rgba(14,165,233,0.25),0_0_25px_-5px_rgba(99,102,241,0.15)] transition-all duration-500 ease-out hover:-translate-y-1.5 hover:border-sky-400/50 hover:shadow-[0_20px_50px_-10px_rgba(14,165,233,0.4),0_0_35px_5px_rgba(56,189,248,0.25)] group">
       {/* Decorative Glow */}
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-sky-500/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-24 -right-24 w-48 h-48 bg-sky-500/25 rounded-full blur-3xl pointer-events-none transition-opacity duration-500 group-hover:opacity-100 opacity-60" />
 
       {/* Brand Header */}
       <div className="flex flex-col items-center gap-3.5 mb-7 text-center">
@@ -69,13 +69,13 @@ export default function RegisterForm() {
           <Zap size={28} className="text-sky-400" />
         </div>
         <div>
-          <div className="flex items-center justify-center gap-1.5">
-            <h1 className="text-2xl font-black tracking-[0.25em] text-white">SPECTRA</h1>
-            <span className="px-2 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/25 text-[10px] font-bold text-sky-400">
+          <div className="flex items-center justify-center gap-2">
+            <h1 className="text-2xl font-black tracking-[0.2em] text-white">SPECTRA</h1>
+            <span className="px-2.5 py-0.5 rounded-full bg-sky-500/15 border border-sky-500/30 text-[11px] font-bold text-sky-400">
               ACTIVATION
             </span>
           </div>
-          <p className="text-xs text-slate-400 font-semibold mt-1 max-w-[320px]">
+          <p className="text-sm text-slate-400 font-medium mt-1.5 max-w-[340px]">
             Aktivasi Perangkat Kontrol & Daftarkan Akun Sekolah Baru
           </p>
         </div>
@@ -84,13 +84,13 @@ export default function RegisterForm() {
       {/* Form Sign Up */}
       <form onSubmit={handleRegister} className="flex flex-col gap-4">
         {/* Activation Code Box Highlight */}
-        <div className="p-4 rounded-2xl bg-blue-950/30 border border-blue-500/30 flex flex-col gap-1.5">
+        <div className="p-4 rounded-2xl bg-blue-950/30 border border-blue-500/30 flex flex-col gap-2">
           <label className="text-xs font-bold text-sky-300 flex items-center justify-between">
             <span className="flex items-center gap-1.5">
               <KeyRound size={14} className="text-sky-400" />
               Kode Aktivasi Perangkat (Tenant ID)
             </span>
-            <span className="text-[10px] text-slate-400 font-normal">Wajib</span>
+            <span className="text-xs text-sky-400/80 font-medium">Wajib</span>
           </label>
           <input
             type="text"
@@ -98,10 +98,10 @@ export default function RegisterForm() {
             value={activationCode}
             onChange={(e) => setActivationCode(e.target.value.toUpperCase())}
             disabled={loading}
-            className="w-full bg-[#080C16] border border-blue-500/40 rounded-xl px-3.5 py-2.5 text-sm font-mono font-bold text-white uppercase placeholder-slate-600 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20 transition-all"
+            className="w-full bg-[#080C16] border border-blue-500/40 rounded-xl px-4 py-3 text-sm font-mono font-bold text-white uppercase placeholder-slate-600 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-500/20 transition-all"
           />
-          <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
-            <Sparkles size={11} className="text-sky-400" />
+          <span className="text-xs text-slate-400 font-medium flex items-center gap-1.5 mt-0.5">
+            <Sparkles size={13} className="text-sky-400 flex-shrink-0" />
             Tertera pada stiker fisik box unit kontrol ESP32
           </span>
         </div>
@@ -118,7 +118,7 @@ export default function RegisterForm() {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             disabled={loading}
-            className="w-full bg-[#080C16] border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-white placeholder-slate-600 focus:outline-none focus:border-slate-600 focus:ring-2 focus:ring-blue-500/20 transition-all"
+            className="w-full bg-[#080C16] border border-slate-800 rounded-xl px-4 py-3 text-sm font-semibold text-white placeholder-slate-600 focus:outline-none focus:border-slate-600 focus:ring-2 focus:ring-blue-500/20 transition-all"
           />
         </div>
 
@@ -134,7 +134,7 @@ export default function RegisterForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
-            className="w-full bg-[#080C16] border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-white placeholder-slate-600 focus:outline-none focus:border-slate-600 focus:ring-2 focus:ring-blue-500/20 transition-all"
+            className="w-full bg-[#080C16] border border-slate-800 rounded-xl px-4 py-3 text-sm font-semibold text-white placeholder-slate-600 focus:outline-none focus:border-slate-600 focus:ring-2 focus:ring-blue-500/20 transition-all"
           />
         </div>
 
@@ -150,12 +150,12 @@ export default function RegisterForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
-            className="w-full bg-[#080C16] border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-white placeholder-slate-600 focus:outline-none focus:border-slate-600 focus:ring-2 focus:ring-blue-500/20 transition-all"
+            className="w-full bg-[#080C16] border border-slate-800 rounded-xl px-4 py-3 text-sm font-semibold text-white placeholder-slate-600 focus:outline-none focus:border-slate-600 focus:ring-2 focus:ring-blue-500/20 transition-all"
           />
         </div>
 
         {error && (
-          <div className="flex items-center gap-2.5 p-3 rounded-xl bg-red-500/10 border border-red-500/25 text-xs font-bold text-red-400 animate-in fade-in duration-200">
+          <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 text-xs font-bold text-red-400 animate-in fade-in duration-200">
             <ShieldAlert size={16} className="flex-shrink-0" />
             <span>{error}</span>
           </div>
@@ -164,7 +164,7 @@ export default function RegisterForm() {
         <Button
           type="submit"
           disabled={loading}
-          className="w-full mt-2 h-12 text-xs font-extrabold tracking-wide bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all rounded-2xl flex items-center justify-center gap-2"
+          className="w-full mt-2 h-12 text-sm font-black tracking-wide bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all rounded-2xl flex items-center justify-center gap-2"
         >
           {loading ? (
             <>
@@ -188,9 +188,9 @@ export default function RegisterForm() {
       <div className="mt-6 pt-5 border-t border-slate-800/80 flex justify-center">
         <Link
           href="/login"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-white transition-colors group"
+          className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white transition-colors group"
         >
-          <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1 text-sky-400" />
+          <ArrowLeft size={15} className="transition-transform group-hover:-translate-x-1 text-sky-400" />
           <span>Sudah memiliki akun? Masuk</span>
         </Link>
       </div>

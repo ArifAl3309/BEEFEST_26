@@ -59,15 +59,15 @@ export default function SidebarMetrics({
   }
 
   return (
-    <div className="w-[380px] flex-shrink-0 border-l border-slate-800/80 bg-[#090D17]/95 flex flex-col h-full overflow-hidden">
+    <div className="w-full lg:w-[380px] flex-shrink-0 border-t lg:border-t-0 lg:border-l border-slate-800/80 bg-[#090D17]/95 flex flex-col min-h-[480px] lg:h-full overflow-hidden">
       {/* ─────────────────────────────────────────────────────────────
           VIEW A: DETAIL TELEMETRI PANEL (Ketika ada titik yang dipilih)
           ───────────────────────────────────────────────────────────── */}
       {panel ? (
         <div className="flex-1 flex flex-col h-full overflow-y-auto p-6 sm:p-7 gap-5 animate-in fade-in duration-200">
           {/* Back button & Header */}
-          <div className="flex items-start justify-between border-b border-slate-800/80 pb-4">
-            <div>
+          <div className="flex items-start justify-between border-b border-slate-800/80 pb-4 gap-3">
+            <div className="min-w-0 flex-1">
               <button
                 onClick={() => onSelectPanel(null)}
                 className="flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-white transition-colors mb-2 group"
@@ -75,10 +75,12 @@ export default function SidebarMetrics({
                 <ArrowLeft size={15} className="transition-transform group-hover:-translate-x-1" />
                 <span>Kembali ke Daftar Titik</span>
               </button>
-              <h2 className="text-lg font-black text-white tracking-tight">{panel.name}</h2>
-              <p className="text-xs text-slate-400 font-semibold mt-0.5">{panel.location_label || 'Lokasi Belum Ditentukan'}</p>
+              <h2 className="text-xl font-black text-white tracking-tight leading-tight truncate">{panel.name}</h2>
+              <p className="text-xs text-slate-400 font-medium mt-1 leading-normal truncate">{panel.location_label || 'Lokasi Belum Ditentukan'}</p>
             </div>
-            <StatusBadge status={panel.latest_reading?.status || 'normal'} />
+            <div className="flex-shrink-0 pt-1">
+              <StatusBadge status={panel.latest_reading?.status || 'normal'} />
+            </div>
           </div>
 
           {/* Emergency PLN Dispatch Alert */}
@@ -118,23 +120,23 @@ export default function SidebarMetrics({
           <button
             type="button"
             onClick={() => onDeletePanel(panel.id)}
-            className="w-full py-3 px-4 rounded-2xl bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/40 text-xs font-black tracking-wide flex items-center justify-center gap-2 transition-all shadow-md shadow-red-500/10"
+            className="w-full py-3 px-4 rounded-2xl bg-red-600/15 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 transition-all shadow-md shadow-red-500/10"
           >
             <Trash2 size={16} />
-            <span>HAPUS TITIK PANEL INI</span>
+            <span>Hapus Titik Panel Ini</span>
           </button>
 
           {/* Edge Status & Sync */}
           <div className="mt-auto pt-4 border-t border-slate-800/80 flex flex-col gap-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-semibold">Analisis Edge FFT:</span>
+              <span className="text-slate-400 font-medium">Analisis Edge FFT:</span>
               <span className={`font-bold flex items-center gap-1.5 ${panel.latest_reading?.arc_detected ? 'text-red-400' : 'text-emerald-400'}`}>
                 <CheckCircle2 size={15} />
                 {panel.latest_reading?.arc_detected ? 'Arc Terdeteksi' : 'Bebas Anomali'}
               </span>
             </div>
-            <div className="text-[11px] text-slate-500 text-center font-mono font-semibold">
-              Update: {formatTimestamp(panel.latest_reading?.created_at || '')}
+            <div className="text-xs text-slate-500 text-center font-mono font-medium tracking-tight">
+              Sinkronisasi: {formatTimestamp(panel.latest_reading?.created_at || '')}
             </div>
           </div>
         </div>
@@ -146,10 +148,10 @@ export default function SidebarMetrics({
           {/* Header Title */}
           <div className="border-b border-slate-800/80 pb-3.5 flex items-center justify-between">
             <div>
-              <h2 className="text-base font-black text-white tracking-wide">Daftar Titik Panel</h2>
-              <p className="text-xs text-slate-400 font-semibold mt-0.5">{panels.length} Modul Terhubung</p>
+              <h2 className="text-lg font-black text-white tracking-tight">Daftar Titik Panel</h2>
+              <p className="text-xs text-slate-400 font-medium mt-0.5">{panels.length} Modul Terhubung</p>
             </div>
-            <span className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/25 text-xs font-black text-sky-400">
+            <span className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/25 text-xs font-black tracking-wide text-sky-400">
               Live Hub
             </span>
           </div>
@@ -171,18 +173,18 @@ export default function SidebarMetrics({
                   }`}
                 >
                   {/* Left: Status Circle Ring + Info */}
-                  <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
                     {getStatusCircle(r?.status, r?.arc_detected)}
-                    <div className="min-w-0">
-                      <h4 className="text-xs font-black text-white tracking-tight truncate group-hover:text-sky-300 transition-colors">
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-black text-white tracking-tight truncate group-hover:text-sky-300 transition-colors leading-snug">
                         {p.name}
                       </h4>
-                      <p className="text-xs text-slate-400 font-medium truncate mt-0.5">
+                      <p className="text-xs text-slate-400 font-medium truncate mt-0.5 leading-normal">
                         {p.location_label || 'Gedung Sekolah'}
                       </p>
-                      <div className="flex items-center gap-2 mt-1.5 text-xs text-slate-400 font-mono font-bold">
+                      <div className="flex items-center gap-2 mt-1.5 text-xs text-slate-300 font-mono font-bold">
                         <span>{fmt(r?.voltage, 'V')}</span>
-                        <span>•</span>
+                        <span className="text-slate-600">•</span>
                         <span>{fmt(r?.current_a, 'A')}</span>
                       </div>
                     </div>
@@ -221,10 +223,10 @@ export default function SidebarMetrics({
           <div className="pt-3 border-t border-slate-800/80">
             <button
               onClick={() => setAddModalOpen(true)}
-              className="w-full h-13 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white text-xs font-black tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-all"
+              className="w-full h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-all"
             >
               <Plus size={19} />
-              <span>Add Tools / Tambah Alat</span>
+              <span>Tambah Alat Baru</span>
             </button>
           </div>
         </div>

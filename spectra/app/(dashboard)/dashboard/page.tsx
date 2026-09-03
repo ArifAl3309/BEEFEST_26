@@ -51,7 +51,7 @@ export default function DashboardPage() {
   }, [])
 
   // Helper untuk memicu Fly Notification jika status waspada atau bahaya
-  const triggerFlyAlert = useCallback((panelName: string, locationLabel: string, reading: SensorReading) => {
+  const triggerFlyAlert = useCallback((panelId: string, panelName: string, locationLabel: string, reading: SensorReading) => {
     if (reading.status === 'warning' || reading.status === 'danger') {
       const now = Date.now()
       const lastTime = lastAlertTimeRef.current[reading.panel_id] || 0
@@ -66,6 +66,7 @@ export default function DashboardPage() {
 
         setActiveAlert({
           id: `${reading.panel_id}-${now}`,
+          panelId,
           panelName,
           locationLabel,
           status: reading.status as 'warning' | 'danger',
@@ -84,7 +85,7 @@ export default function DashboardPage() {
         if (json.data) {
           json.data.forEach((p: PanelWithReading) => {
             if (p.latest_reading) {
-              triggerFlyAlert(p.name, p.location_label || '', p.latest_reading)
+              triggerFlyAlert(p.id, p.name, p.location_label || '', p.latest_reading)
             }
           })
 
@@ -168,13 +169,13 @@ export default function DashboardPage() {
   const selectedPanel = panels.find((p) => p.id === selectedPanelId) || discoverPanel || null
 
   return (
-    <div className="flex-1 flex overflow-hidden w-full h-[calc(100vh-64px)] relative">
+    <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden w-full min-h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] relative">
       {/* ─────────────────────────────────────────────────────────────
-          MAIN CONTENT AREA (Kiri-Tengah)
+          MAIN CONTENT AREA (Kiri-Tengah di Desktop, Atas di Mobile)
           - Jika discoverPanel aktif: Tampilkan Halaman Detail (Chart, Historis, Spesifikasi)
           - Jika tidak: Tampilkan Interactive Floor Plan Denah
           ───────────────────────────────────────────────────────────── */}
-      <div className="flex-1 p-5 overflow-hidden flex flex-col min-w-0">
+      <div className="flex-1 p-3.5 sm:p-5 flex flex-col min-w-0 h-[500px] sm:h-[600px] lg:h-full flex-shrink-0 lg:flex-shrink">
         {discoverPanel ? (
           <PanelDiscoverView panel={discoverPanel} onBack={() => setDiscoverPanel(null)} />
         ) : (
@@ -199,7 +200,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
-          SIDEBAR AREA (Kanan) — Tetap Konsisten Memuat Data Pendeteksian
+          SIDEBAR AREA (Kanan di Desktop, Bawah di Mobile)
           ───────────────────────────────────────────────────────────── */}
       <SidebarMetrics
         panel={selectedPanel}
@@ -218,7 +219,18 @@ export default function DashboardPage() {
       />
 
       {/* Fly Notification Alert */}
-      <FlyNotification alert={activeAlert} onDismiss={() => setActiveAlert(null)} />
+      <FlyNotification
+        alert={activeAlert}
+        onDismiss={() => setActiveAlert(null)}
+        onOpenPanel={(panelId) => {
+          setSelectedPanelId(panelId)
+          const target = panels.find((p) => p.id === panelId)
+          if (target) {
+            setDiscoverPanel(target)
+          }
+          setActiveAlert(null)
+        }}
+      />
     </div>
   )
 }

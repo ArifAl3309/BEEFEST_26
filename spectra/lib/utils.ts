@@ -21,3 +21,11 @@ export function formatTimestamp(iso: string): string {
   const date = d.toLocaleDateString('id-ID')
   return `${time} WIB (${date})`
 }
+
+export function formatDateTimeParts(iso: string): { time: string; date: string } {
+  if (!iso) return { time: '--', date: '' }
+  const d = new Date(iso)
+  const time = d.toLocaleTimeString('id-ID', { hour12: false })
+  const date = d.toLocaleDateString('id-ID')
+  return { time: `${time} WIB`, date: `(${date})` }
+}

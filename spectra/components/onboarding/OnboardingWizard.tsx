@@ -102,14 +102,14 @@ export default function OnboardingWizard() {
     <div className="flex flex-col gap-6">
       {/* Header Wizard */}
       <div className="border-b border-slate-800/80 pb-4">
-        <h2 className="text-xl font-black text-white tracking-tight">Setup Onboarding Sekolah</h2>
-        <p className="text-xs text-slate-400 font-semibold mt-0.5">Langkah {step} dari 2</p>
+        <h2 className="text-2xl font-black text-white tracking-tight">Setup Onboarding Sekolah</h2>
+        <p className="text-sm text-slate-400 font-medium mt-1">Langkah {step} dari 2 — Konfigurasi Fasilitas & Titik Pemantauan</p>
       </div>
 
       {/* Notifikasi Error Validasi */}
       {validationError && (
-        <div className="p-3.5 rounded-xl bg-red-950/40 border border-red-500/30 text-red-300 text-xs font-bold flex items-center gap-2.5 animate-in fade-in duration-200">
-          <AlertCircle size={16} className="text-red-400 flex-shrink-0" />
+        <div className="p-4 rounded-2xl bg-red-950/40 border border-red-500/30 text-red-300 text-xs font-bold flex items-center gap-3 animate-in fade-in duration-200">
+          <AlertCircle size={18} className="text-red-400 flex-shrink-0" />
           <span>{validationError}</span>
         </div>
       )}

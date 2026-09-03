@@ -128,39 +128,39 @@ export default function PanelDetailCard({
       </div>
 
       {/* Header: Nama Gedung / Titik Panel */}
-      <div className="mb-3">
-        <h3 className="text-base font-extrabold text-slate-900 tracking-tight leading-snug">
+      <div className="mb-3.5">
+        <h3 className="text-base font-black text-slate-900 tracking-tight leading-snug truncate">
           {panel.name}
         </h3>
-        <p className="text-[11px] text-slate-400 font-semibold mt-0.5">
+        <p className="text-xs text-slate-500 font-medium mt-0.5 truncate">
           {panel.location_label || 'Lokasi Belum Ditentukan'}
         </p>
       </div>
 
       {/* Telemetry Information List */}
-      <div className="flex flex-col gap-2 py-2.5 border-t border-b border-slate-100 text-xs">
+      <div className="flex flex-col gap-2.5 py-3 border-t border-b border-slate-100">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-slate-500 font-semibold text-[11px]">
-            <Zap size={13} className="text-blue-600" />
+          <div className="flex items-center gap-2 text-slate-600 font-medium text-xs">
+            <Zap size={14} className="text-blue-600 flex-shrink-0" />
             <span>Tegangan</span>
           </div>
-          <span className="font-extrabold text-slate-800 font-mono text-xs">{fmt(r?.voltage, 'V')}</span>
+          <span className="font-extrabold text-slate-900 font-mono text-xs">{fmt(r?.voltage, 'V')}</span>
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-slate-500 font-semibold text-[11px]">
-            <Activity size={13} className="text-cyan-600" />
+          <div className="flex items-center gap-2 text-slate-600 font-medium text-xs">
+            <Activity size={14} className="text-cyan-600 flex-shrink-0" />
             <span>Arus Beban</span>
           </div>
-          <span className="font-extrabold text-slate-800 font-mono text-xs">{fmt(r?.current_a, 'A')}</span>
+          <span className="font-extrabold text-slate-900 font-mono text-xs">{fmt(r?.current_a, 'A')}</span>
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-slate-500 font-semibold text-[11px]">
-            <Thermometer size={13} className="text-amber-500" />
+          <div className="flex items-center gap-2 text-slate-600 font-medium text-xs">
+            <Thermometer size={14} className="text-amber-500 flex-shrink-0" />
             <span>Suhu Panel</span>
           </div>
-          <span className={`font-extrabold font-mono text-xs ${(r?.temperature_panel || 0) > 60 ? 'text-red-600' : 'text-slate-800'}`}>
+          <span className={`font-extrabold font-mono text-xs ${(r?.temperature_panel || 0) > 60 ? 'text-red-600' : 'text-slate-900'}`}>
             {fmt(r?.temperature_panel, '°C')}
           </span>
         </div>
@@ -170,9 +170,9 @@ export default function PanelDetailCard({
       <div className="mt-3.5 flex items-center justify-between">
         <button
           onClick={onDiscoverMore}
-          className="text-[11px] font-black uppercase tracking-wider text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1.5 group"
+          className="text-xs font-black uppercase tracking-wider text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1.5 group"
         >
-          <span>DISCOVER MORE</span>
+          <span>Detail Analisis</span>
           <span className="text-sm font-bold transition-transform group-hover:translate-x-1">→</span>
         </button>
       </div>

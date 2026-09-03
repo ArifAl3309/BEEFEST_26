@@ -27,15 +27,15 @@ export default function MetricCard({ label, value, unit, icon, isDanger }: Metri
           : 'border-slate-800/80 hover:border-slate-700/80 hover:bg-[#131C30]'
       }`}
     >
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-xl bg-[#090D17] border border-slate-800/60 shadow-inner">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="p-2.5 rounded-xl bg-[#090D17] border border-slate-800/70 shadow-inner flex-shrink-0 flex items-center justify-center">
           {icons[icon]}
         </div>
-        <span className="text-xs text-slate-300 font-medium">{label}</span>
+        <span className="text-[13px] text-slate-300 font-medium truncate leading-tight">{label}</span>
       </div>
-      <div className="text-right">
-        <span className="font-mono text-base font-black tracking-tight text-white">{value}</span>
-        <span className="text-[11px] font-semibold text-slate-400 ml-1">{unit}</span>
+      <div className="text-right flex items-baseline justify-end gap-1 flex-shrink-0 pl-3">
+        <span className="font-mono text-lg font-black tracking-tight text-white leading-none">{value}</span>
+        <span className="text-xs font-bold text-slate-400 leading-none">{unit}</span>
       </div>
     </div>
   )

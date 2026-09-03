@@ -27,7 +27,7 @@ export default function DashboardClientLayout({ tenantName, userFullName, childr
   }, [])
 
   return (
-    <div className="min-h-screen flex flex-col bg-[--bg-base]">
+    <div className="min-h-screen flex flex-col bg-[#06080F] text-slate-100">
       <Navbar tenantName={tenantName} userFullName={userFullName} isConnected={isConnected} />
       <div className="flex-1 flex overflow-hidden">{children}</div>
     </div>

@@ -5,8 +5,6 @@ import { PanelWithReading } from '@/lib/types'
 import PanelNode from './PanelNode'
 import PanelDetailCard from './PanelDetailCard'
 import {
-  MousePointer,
-  Hand,
   ZoomIn,
   ZoomOut,
   RotateCcw,
@@ -37,17 +35,21 @@ export default function InteractiveFloorPlan({
   const containerRef = useRef<HTMLDivElement>(null)
   const transformLayerRef = useRef<HTMLDivElement>(null)
 
-  const [mode, setMode] = useState<'cursor' | 'hand'>('cursor')
-
   // Transform states: zoom & pan offsets
   const [scale, setScale] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isPanning, setIsPanning] = useState(false)
   const [startPos, setStartPos] = useState({ x: 0, y: 0 })
 
+  // Refs untuk sinkronisasi nilai state terkini secara real-time pada event listener
+  const transformRef = useRef({ scale: 1, pan: { x: 0, y: 0 } })
+  useEffect(() => {
+    transformRef.current = { scale, pan }
+  }, [scale, pan])
+
   const selectedPanel = panels.find((p) => p.id === selectedPanelId) || null
 
-  // 1. Mouse Wheel Zoom Presisi Tinggi Berpusat Tepat Pada Posisi Kursor Mouse
+  // 1. Mouse Wheel Zoom Presisi Tinggi & Ultra-Smooth Berpusat Tepat Pada Posisi Kursor Mouse
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -56,46 +58,109 @@ export default function InteractiveFloorPlan({
       e.preventDefault()
       const rect = el.getBoundingClientRect()
 
+      // Posisi kursor mouse relatif terhadap container viewport
       const mouseX = e.clientX - rect.left
       const mouseY = e.clientY - rect.top
 
-      const zoomFactor = e.deltaY > 0 ? 0.88 : 1.14
+      const { scale: currentScale, pan: currentPan } = transformRef.current
 
-      setScale((prevScale) => {
-        const nextScale = Math.max(0.5, Math.min(prevScale * zoomFactor, 3.5))
-        if (nextScale === prevScale) return prevScale
+      // Sensitivity zoom factor yang halus
+      const zoomIntensity = 0.0018
+      const factor = Math.exp(-e.deltaY * zoomIntensity)
+      const nextScale = Math.max(0.5, Math.min(currentScale * factor, 4.0))
 
-        setPan((prevPan) => ({
-          x: mouseX - (mouseX - prevPan.x) * (nextScale / prevScale),
-          y: mouseY - (mouseY - prevPan.y) * (nextScale / prevScale),
-        }))
+      if (Math.abs(nextScale - currentScale) < 0.0001) return
 
-        return nextScale
-      })
+      // Hitung koordinat pan baru agar titik di bawah kursor mouse tetap tepat di posisi kursor
+      const nextPanX = mouseX - (mouseX - currentPan.x) * (nextScale / currentScale)
+      const nextPanY = mouseY - (mouseY - currentPan.y) * (nextScale / currentScale)
+
+      transformRef.current = { scale: nextScale, pan: { x: nextPanX, y: nextPanY } }
+      setScale(nextScale)
+      setPan({ x: nextPanX, y: nextPanY })
     }
 
     el.addEventListener('wheel', handleWheel, { passive: false })
     return () => el.removeEventListener('wheel', handleWheel)
   }, [])
 
-  // 2. Pan Handlers
+  // 2. Pan Handlers (Mouse Window Listener & Touch untuk HP/Tablet)
+  const isPanningRef = useRef(false)
+  const startPosRef = useRef({ x: 0, y: 0 })
+
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (mode === 'hand') {
+    // Jangan pan jika user mengklik tombol atau elemen interaktif
+    if ((e.target as HTMLElement)?.closest('button, [data-interactive="true"]')) return
+    e.preventDefault() // Cegah seleksi teks dan ghost drag native browser
+
+    isPanningRef.current = true
+    setIsPanning(true)
+    startPosRef.current = { x: e.clientX - transformRef.current.pan.x, y: e.clientY - transformRef.current.pan.y }
+  }
+
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (!isPanningRef.current) return
+      const nextPanX = e.clientX - startPosRef.current.x
+      const nextPanY = e.clientY - startPosRef.current.y
+
+      transformRef.current.pan = { x: nextPanX, y: nextPanY }
+      setPan({ x: nextPanX, y: nextPanY })
+    }
+
+    const handleGlobalMouseUp = () => {
+      if (isPanningRef.current) {
+        isPanningRef.current = false
+        setIsPanning(false)
+      }
+    }
+
+    window.addEventListener('mousemove', handleGlobalMouseMove)
+    window.addEventListener('mouseup', handleGlobalMouseUp)
+
+    return () => {
+      window.removeEventListener('mousemove', handleGlobalMouseMove)
+      window.removeEventListener('mouseup', handleGlobalMouseUp)
+    }
+  }, [])
+
+  // Touch Support untuk HP / Tablet
+  const touchStartRef = useRef<{ x: number; y: number; dist: number }>({ x: 0, y: 0, dist: 0 })
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
       setIsPanning(true)
-      setStartPos({ x: e.clientX - pan.x, y: e.clientY - pan.y })
+      touchStartRef.current = {
+        x: e.touches[0].clientX - pan.x,
+        y: e.touches[0].clientY - pan.y,
+        dist: 0,
+      }
+    } else if (e.touches.length === 2) {
+      setIsPanning(false)
+      const dx = e.touches[0].clientX - e.touches[1].clientX
+      const dy = e.touches[0].clientY - e.touches[1].clientY
+      touchStartRef.current.dist = Math.hypot(dx, dy)
     }
   }
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isPanning && mode === 'hand') {
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 1 && isPanning) {
       setPan({
-        x: e.clientX - startPos.x,
-        y: e.clientY - startPos.y,
+        x: e.touches[0].clientX - touchStartRef.current.x,
+        y: e.touches[0].clientY - touchStartRef.current.y,
       })
+    } else if (e.touches.length === 2 && touchStartRef.current.dist > 0) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX
+      const dy = e.touches[0].clientY - e.touches[1].clientY
+      const newDist = Math.hypot(dx, dy)
+      const ratio = newDist / touchStartRef.current.dist
+
+      setScale((prevScale) => Math.max(0.5, Math.min(prevScale * ratio, 4.0)))
+      touchStartRef.current.dist = newDist
     }
   }
 
-  const handleMouseUp = () => {
+  const handleTouchEnd = () => {
     setIsPanning(false)
   }
 
@@ -111,7 +176,7 @@ export default function InteractiveFloorPlan({
     const centerY = rect.height / 2
 
     setScale((prevScale) => {
-      const nextScale = Math.max(0.5, Math.min(prevScale * factor, 3.5))
+      const nextScale = Math.max(0.5, Math.min(prevScale * factor, 4.0))
       if (nextScale === prevScale) return prevScale
 
       setPan((prevPan) => ({
@@ -158,53 +223,22 @@ export default function InteractiveFloorPlan({
       <div className="flex items-center justify-between z-30 flex-wrap gap-2">
         {/* Profile Card */}
         <div className="flex items-center gap-3.5 p-2 pr-5 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-slate-800 shadow-xl">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center text-white font-black text-sm shadow-md shadow-blue-500/20">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center text-white font-black text-sm shadow-md shadow-blue-500/20 flex-shrink-0">
             {userFullName ? userFullName.charAt(0).toUpperCase() : 'U'}
           </div>
-          <div className="flex flex-col">
-            <div className="text-sm font-black text-white tracking-tight leading-snug">
+          <div className="flex flex-col justify-center min-w-0">
+            <div className="text-sm font-black text-white tracking-tight leading-none truncate">
               {userFullName || 'Operator'}
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-              <Building2 size={13} className="text-slate-500" />
-              <span className="truncate max-w-[200px]">{tenantName || 'Tenant Sekolah'}</span>
+            <div className="flex items-center gap-1.5 text-xs font-medium text-slate-400 mt-1">
+              <Building2 size={13} className="text-slate-500 flex-shrink-0" />
+              <span className="truncate max-w-[200px] leading-tight">{tenantName || 'Tenant Sekolah'}</span>
             </div>
           </div>
         </div>
 
-        {/* Right Controls: Mode & Zoom */}
+        {/* Right Controls: Zoom Only */}
         <div className="flex items-center gap-2.5">
-          {/* Mode Selector */}
-          <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-slate-800 shadow-xl">
-            <button
-              type="button"
-              onClick={() => setMode('cursor')}
-              title="Mode Kursor (Detail & Geser Titik)"
-              className={`p-2.5 rounded-xl text-xs font-bold transition-all duration-200 ${
-                mode === 'cursor'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-              }`}
-            >
-              <MousePointer size={18} />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMode('hand')
-                onSelectPanel(null)
-              }}
-              title="Mode Geser Denah (Pan Navigation)"
-              className={`p-2.5 rounded-xl text-xs font-bold transition-all duration-200 ${
-                mode === 'hand'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-              }`}
-            >
-              <Hand size={18} />
-            </button>
-          </div>
-
           {/* Zoom Buttons */}
           <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-slate-800 shadow-xl">
             <button
@@ -239,22 +273,18 @@ export default function InteractiveFloorPlan({
       <div
         ref={containerRef}
         onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         onClick={() => {
           if (!isPanning) onSelectPanel(null)
         }}
-        className={`relative flex-1 w-full rounded-[30px] overflow-hidden border border-slate-800/80 bg-[#070B14] shadow-2xl ${
-          mode === 'hand'
-            ? isPanning
-              ? 'cursor-grabbing'
-              : 'cursor-grab'
-            : 'cursor-default'
+        className={`relative flex-1 w-full rounded-[30px] overflow-hidden border border-slate-800/80 bg-[#070B14] shadow-2xl transition-[cursor] touch-none select-none ${
+          isPanning ? 'cursor-grabbing' : 'cursor-grab'
         }`}
-        style={{ minHeight: '540px' }}
+        style={{ minHeight: '380px' }}
       >
         {/* Fixed Compass Indicator */}
         <div className="absolute top-5 right-5 z-20 pointer-events-none flex flex-col items-center justify-center w-11 h-11 rounded-full bg-[#0E1626]/90 border border-slate-700/60 shadow-xl backdrop-blur-md">
@@ -268,11 +298,11 @@ export default function InteractiveFloorPlan({
         {/* Transform Layer Denah Arsitektur */}
         <div
           ref={transformLayerRef}
-          className="relative w-full h-full"
+          className="relative w-full h-full will-change-transform"
           style={{
             transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
             transformOrigin: '0 0',
-            transition: isPanning ? 'none' : 'transform 0.05s ease-out',
+            transition: isPanning ? 'none' : 'transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1)',
           }}
         >
           <img

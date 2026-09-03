@@ -28,7 +28,7 @@ export async function GET() {
   if (panelsError || !panels) {
     return NextResponse.json({ data: null, error: panelsError?.message || 'Error' }, { status: 500 })
   }
-  return NextResponse.json({ data, error: null })
+  return NextResponse.json({ data: panels, error: null })
 }
 
 export async function POST(request: Request) {

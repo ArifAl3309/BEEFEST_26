@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { PanelWithReading, SensorReading } from '@/lib/types'
-import { fmt, formatTimestamp } from '@/lib/utils'
+import { fmt, formatTimestamp, formatDateTimeParts } from '@/lib/utils'
 import StatusBadge from '@/components/ui/StatusBadge'
 import {
   ArrowLeft,
@@ -114,13 +114,13 @@ export default function PanelDiscoverView({ panel, onBack }: PanelDiscoverViewPr
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-black uppercase tracking-widest text-sky-400">
+              <span className="text-xs font-black uppercase tracking-widest text-sky-400">
                 SPECTRA DETAILED ANALYTICS
               </span>
               <span className="w-1.5 h-1.5 rounded-full bg-slate-600" />
-              <span className="text-xs text-slate-400 font-semibold">{panel.location_label || 'Gedung Sekolah'}</span>
+              <span className="text-xs text-slate-400 font-medium">{panel.location_label || 'Gedung Sekolah'}</span>
             </div>
-            <h1 className="text-2xl font-black text-white tracking-tight mt-0.5">{panel.name}</h1>
+            <h1 className="text-2xl font-black text-white tracking-tight mt-1">{panel.name}</h1>
           </div>
         </div>
 
@@ -132,7 +132,7 @@ export default function PanelDiscoverView({ panel, onBack }: PanelDiscoverViewPr
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 text-xs font-bold transition-all shadow-md"
           >
             <Download size={15} className="text-sky-400" />
-            <span>Export CSV</span>
+            <span>Ekspor CSV</span>
           </button>
         </div>
       </div>
@@ -144,7 +144,7 @@ export default function PanelDiscoverView({ panel, onBack }: PanelDiscoverViewPr
         {/* Chart Tab Navigation */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
           <div>
-            <h2 className="text-base font-black text-white tracking-wide">Tren & Grafik Dinamis Real-Time</h2>
+            <h2 className="text-lg font-black text-white tracking-tight">Tren & Grafik Dinamis Real-Time</h2>
             <p className="text-xs text-slate-400 font-medium mt-0.5">
               Visualisasi time-series 30 data sampling telemetri terakhir
             </p>
@@ -410,28 +410,29 @@ export default function PanelDiscoverView({ panel, onBack }: PanelDiscoverViewPr
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs whitespace-nowrap border-collapse">
             <thead>
               <tr className="border-b border-slate-800 text-slate-400 font-bold uppercase text-[10px] tracking-wider">
-                <th className="py-3 px-4">Waktu (WIB)</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Tegangan</th>
-                <th className="py-3 px-4">Arus</th>
-                <th className="py-3 px-4">Daya</th>
-                <th className="py-3 px-4">Suhu Busbar</th>
-                <th className="py-3 px-4">Suhu Ambient</th>
-                <th className="py-3 px-4">FFT Arc</th>
+                <th className="py-3.5 px-4 font-semibold">Waktu (WIB)</th>
+                <th className="py-3.5 px-4 font-semibold">Status</th>
+                <th className="py-3.5 px-4 font-semibold">Tegangan</th>
+                <th className="py-3.5 px-4 font-semibold">Arus</th>
+                <th className="py-3.5 px-4 font-semibold">Daya</th>
+                <th className="py-3.5 px-4 font-semibold">Suhu Busbar</th>
+                <th className="py-3.5 px-4 font-semibold">Suhu Ambient</th>
+                <th className="py-3.5 px-4 font-semibold">FFT Arc</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-850">
+            <tbody className="divide-y divide-slate-800/80">
               {logs.map((log) => {
                 const isDanger = log.status === 'danger'
                 const isWarning = log.status === 'warning'
+                const dt = formatDateTimeParts(log.created_at)
 
                 return (
                   <tr
                     key={log.id}
-                    className={`hover:bg-slate-900/50 transition-colors ${
+                    className={`hover:bg-slate-900/50 transition-colors h-14 ${
                       isDanger
                         ? 'bg-red-950/20 text-red-300'
                         : isWarning
@@ -439,12 +440,15 @@ export default function PanelDiscoverView({ panel, onBack }: PanelDiscoverViewPr
                         : 'text-slate-300'
                     }`}
                   >
-                    <td className="py-3 px-4 font-mono text-[11px] text-slate-400">
-                      {formatTimestamp(log.created_at)}
+                    <td className="py-2.5 px-4 font-mono text-xs align-middle whitespace-nowrap">
+                      <div className="flex flex-col justify-center leading-tight">
+                        <span className="font-bold text-slate-200">{dt.time}</span>
+                        <span className="text-[11px] text-slate-400 mt-0.5">{dt.date}</span>
+                      </div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4 align-middle">
                       <span
-                        className={`px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider ${
+                        className={`inline-flex items-center justify-center min-w-[84px] px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider ${
                           isDanger
                             ? 'bg-red-500/20 text-red-400 border border-red-500/40'
                             : isWarning
@@ -455,25 +459,35 @@ export default function PanelDiscoverView({ panel, onBack }: PanelDiscoverViewPr
                         {log.status}
                       </span>
                     </td>
-                    <td className="py-3 px-4 font-mono font-bold">{fmt(log.voltage, 'V')}</td>
-                    <td className="py-3 px-4 font-mono font-bold">{fmt(log.current_a, 'A')}</td>
-                    <td className="py-3 px-4 font-mono font-bold">{fmt(log.power, 'W')}</td>
+                    <td className="py-3.5 px-4 font-mono font-bold text-xs align-middle">
+                      {fmt(log.voltage, 'V')}
+                    </td>
+                    <td className="py-3.5 px-4 font-mono font-bold text-xs align-middle">
+                      {fmt(log.current_a, 'A')}
+                    </td>
+                    <td className="py-3.5 px-4 font-mono font-bold text-xs align-middle">
+                      {fmt(log.power, 'W')}
+                    </td>
                     <td
-                      className={`py-3 px-4 font-mono font-bold ${
+                      className={`py-3.5 px-4 font-mono font-bold text-xs align-middle ${
                         (log.temperature_panel || 0) > 60 ? 'text-red-400' : ''
                       }`}
                     >
                       {fmt(log.temperature_panel, '°C')}
                     </td>
-                    <td className="py-3 px-4 font-mono">{fmt(log.temperature_ambient, '°C')}</td>
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4 font-mono text-xs align-middle">
+                      {fmt(log.temperature_ambient, '°C')}
+                    </td>
+                    <td className="py-3.5 px-4 align-middle">
                       {log.arc_detected ? (
-                        <span className="text-red-400 font-bold flex items-center gap-1">
-                          <AlertTriangle size={13} /> Arc Flash
+                        <span className="text-red-400 font-bold inline-flex items-center gap-1.5 text-xs">
+                          <AlertTriangle size={14} className="flex-shrink-0" />
+                          <span>Arc Flash</span>
                         </span>
                       ) : (
-                        <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                          <ShieldCheck size={13} /> Normal
+                        <span className="text-emerald-400 font-semibold inline-flex items-center gap-1.5 text-xs">
+                          <ShieldCheck size={14} className="flex-shrink-0" />
+                          <span>Normal</span>
                         </span>
                       )}
                     </td>
