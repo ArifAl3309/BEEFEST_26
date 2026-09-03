@@ -144,7 +144,7 @@ export default function DashboardPage() {
           setPanels((prev) =>
             prev.map((p) => {
               if (p.id === reading.panel_id) {
-                triggerFlyAlert(p.name, p.location_label || '', reading)
+                triggerFlyAlert(p.id, p.name, p.location_label || '', reading)
                 return { ...p, latest_reading: reading }
               }
               return p
