@@ -58,11 +58,13 @@ export default function PanelDiscoverView({ panel, onBack }: PanelDiscoverViewPr
     return () => clearInterval(interval)
   }, [fetchHistory])
 
-  // Format data untuk Recharts
+  // Format data untuk Recharts (Format Lengkap: Jam:Menit:Detik)
   const formattedChartData = chartData.map((d) => {
     const time = new Date(d.created_at).toLocaleTimeString('id-ID', {
+      hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
+      hour12: false,
     })
     return {
       time,
