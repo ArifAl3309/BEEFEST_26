@@ -218,51 +218,50 @@ export default function InteractiveFloorPlan({
 
   return (
     <div className="relative w-full h-full flex flex-col gap-3.5 select-none">
-      {/* Top Toolbar */}
-      <div className="flex items-center justify-between z-30 flex-wrap gap-2">
+      {/* Top Toolbar (Responsif penuh untuk HP kecil hingga Desktop) */}
+      <div className="flex items-center justify-between z-30 gap-2 w-full">
         {/* Profile Card */}
-        <div className="flex items-center gap-3.5 p-2 pr-5 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-slate-800 shadow-xl">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center text-white font-black text-sm shadow-md shadow-blue-500/20 flex-shrink-0">
+        <div className="flex items-center gap-2.5 sm:gap-3.5 p-1.5 sm:p-2 pr-3 sm:pr-5 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-slate-800 shadow-xl min-w-0 flex-1 sm:flex-initial">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center text-white font-black text-xs sm:text-sm shadow-md shadow-blue-500/20 flex-shrink-0">
             {userFullName ? userFullName.charAt(0).toUpperCase() : 'U'}
           </div>
-          <div className="flex flex-col justify-center min-w-0">
-            <div className="text-sm font-black text-white tracking-tight leading-none truncate">
+          <div className="flex flex-col justify-center min-w-0 flex-1">
+            <div className="text-xs sm:text-sm font-black text-white tracking-tight leading-none truncate">
               {userFullName || 'Operator'}
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-medium text-slate-400 mt-1">
-              <Building2 size={13} className="text-slate-500 flex-shrink-0" />
-              <span className="truncate max-w-[200px] leading-tight">{tenantName || 'Tenant Sekolah'}</span>
+            <div className="flex items-center gap-1 text-[11px] sm:text-xs font-medium text-slate-400 mt-1">
+              <Building2 size={12} className="text-slate-500 flex-shrink-0" />
+              <span className="truncate max-w-[130px] sm:max-w-[200px] leading-tight">{tenantName || 'Tenant Sekolah'}</span>
             </div>
           </div>
         </div>
 
-        {/* Right Controls: Zoom Only */}
-        <div className="flex items-center gap-2.5">
-          {/* Zoom Buttons */}
-          <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-slate-800 shadow-xl">
+        {/* Right Controls: Zoom Buttons */}
+        <div className="flex items-center gap-1 sm:gap-2.5 flex-shrink-0">
+          <div className="flex items-center gap-0.5 sm:gap-1 p-1 sm:p-1.5 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-slate-800 shadow-xl">
             <button
               type="button"
               onClick={() => handleZoomButton(1.15)}
               title="Perbesar (Zoom In)"
-              className="p-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="p-1.5 sm:p-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
             >
-              <ZoomIn size={18} />
+              <ZoomIn size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
             <button
               type="button"
               onClick={() => handleZoomButton(0.85)}
               title="Perkecil (Zoom Out)"
-              className="p-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="p-1.5 sm:p-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
             >
-              <ZoomOut size={18} />
+              <ZoomOut size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
             <button
               type="button"
               onClick={resetView}
               title="Reset Ukuran & Posisi"
-              className="p-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="p-1.5 sm:p-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
             >
-              <RotateCcw size={16} />
+              <RotateCcw size={15} className="sm:w-4 sm:h-4" />
             </button>
           </div>
         </div>

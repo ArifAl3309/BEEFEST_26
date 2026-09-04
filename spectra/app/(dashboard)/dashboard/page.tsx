@@ -175,7 +175,7 @@ export default function DashboardPage() {
           - Jika discoverPanel aktif: Tampilkan Halaman Detail (Chart, Historis, Spesifikasi)
           - Jika tidak: Tampilkan Interactive Floor Plan Denah
           ───────────────────────────────────────────────────────────── */}
-      <div className="flex-1 p-3.5 sm:p-5 flex flex-col min-w-0 h-[500px] sm:h-[600px] lg:h-full flex-shrink-0 lg:flex-shrink">
+      <div className="flex-1 p-2 sm:p-4 lg:p-5 flex flex-col min-w-0 h-[480px] sm:h-[580px] lg:h-full flex-shrink-0 lg:flex-shrink">
         {discoverPanel ? (
           <PanelDiscoverView panel={discoverPanel} onBack={() => setDiscoverPanel(null)} />
         ) : (

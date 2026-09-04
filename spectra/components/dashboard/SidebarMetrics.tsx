@@ -64,7 +64,7 @@ export default function SidebarMetrics({
           VIEW A: DETAIL TELEMETRI PANEL (Ketika ada titik yang dipilih)
           ───────────────────────────────────────────────────────────── */}
       {panel ? (
-        <div className="flex-1 flex flex-col h-full overflow-y-auto p-6 sm:p-7 gap-5 animate-in fade-in duration-200">
+        <div className="flex-1 flex flex-col h-full overflow-y-auto p-4 sm:p-6 lg:p-7 gap-4 sm:gap-5 animate-in fade-in duration-200">
           {/* Back button & Header */}
           <div className="flex items-start justify-between border-b border-slate-800/80 pb-4 gap-3">
             <div className="min-w-0 flex-1">
@@ -75,7 +75,7 @@ export default function SidebarMetrics({
                 <ArrowLeft size={15} className="transition-transform group-hover:-translate-x-1" />
                 <span>Kembali ke Daftar Titik</span>
               </button>
-              <h2 className="text-xl font-black text-white tracking-tight leading-tight truncate">{panel.name}</h2>
+              <h2 className="text-lg sm:text-xl font-black text-white tracking-tight leading-tight truncate">{panel.name}</h2>
               <p className="text-xs text-slate-400 font-medium mt-1 leading-normal truncate">{panel.location_label || 'Lokasi Belum Ditentukan'}</p>
             </div>
             <div className="flex-shrink-0 pt-1">
@@ -144,7 +144,7 @@ export default function SidebarMetrics({
         /* ─────────────────────────────────────────────────────────────
            VIEW B: DAFTAR DISPLAY CARD TITIK PANEL & TOMBOL ADD TOOLS
            ───────────────────────────────────────────────────────────── */
-        <div className="flex-1 flex flex-col h-full overflow-hidden p-6 sm:p-7 gap-4 animate-in fade-in duration-200">
+        <div className="flex-1 flex flex-col h-full overflow-hidden p-4 sm:p-6 lg:p-7 gap-3.5 sm:gap-4 animate-in fade-in duration-200">
           {/* Header Title */}
           <div className="border-b border-slate-800/80 pb-3.5 flex items-center justify-between">
             <div>

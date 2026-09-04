@@ -35,13 +35,13 @@ export default function Navbar({ isConnected }: NavbarProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 h-16 border-b border-slate-800/80 bg-[#080C16]/95 backdrop-blur-xl px-4 sm:px-7 flex items-center justify-between gap-2">
+    <header className="sticky top-0 z-50 h-16 border-b border-slate-800/80 bg-[#080C16]/95 backdrop-blur-xl px-3 sm:px-7 flex items-center justify-between gap-2">
       {/* Brand: Logo & Title */}
-      <div className="flex items-center gap-2.5 sm:gap-3.5">
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center shadow-inner flex-shrink-0">
-          <Zap size={20} className="text-sky-400" />
+      <div className="flex items-center gap-2 sm:gap-3.5 flex-shrink-0">
+        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center shadow-inner flex-shrink-0">
+          <Zap size={18} className="text-sky-400 sm:w-5 sm:h-5" />
         </div>
-        <span className="font-black text-xl sm:text-2xl tracking-[0.18em] sm:tracking-[0.2em] text-white leading-none flex items-center select-none">
+        <span className="font-black text-lg sm:text-2xl tracking-[0.16em] sm:tracking-[0.2em] text-white leading-none flex items-center select-none">
           SPECTRA
         </span>
       </div>
