@@ -6,6 +6,7 @@
 class DeviceNotificationService {
   private audioCtx: AudioContext | null = null
   private permissionGranted: boolean = false
+  private enabled: boolean = true
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -15,6 +16,26 @@ class DeviceNotificationService {
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js').catch(() => {})
       }
+      // Ambil preferensi user dari localStorage (default: true)
+      const saved = localStorage.getItem('spectra_device_notif_enabled')
+      this.enabled = saved !== null ? saved === 'true' : true
+    }
+  }
+
+  /**
+   * Cek apakah notifikasi sistem sedang aktif
+   */
+  isEnabled(): boolean {
+    return this.enabled && this.permissionGranted
+  }
+
+  /**
+   * Toggle status aktif/nonaktif
+   */
+  setEnabled(status: boolean) {
+    this.enabled = status
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('spectra_device_notif_enabled', status ? 'true' : 'false')
     }
   }
 
@@ -105,6 +126,9 @@ class DeviceNotificationService {
    */
   async notify(title: string, options?: { body: string; status?: 'warning' | 'danger'; panelId?: string }) {
     if (typeof window === 'undefined') return
+
+    // Jika user menonaktifkan lonceng, jangan kirim alarm suara dan banner OS
+    if (!this.enabled) return
 
     // 1. Bunyikan audio chime
     this.playAlertSound(options?.status || 'warning')
