@@ -36,6 +36,26 @@ class DeviceNotificationService {
   }
 
   /**
+   * Cek apakah notifikasi diaktifkan oleh preferensi pengguna
+   */
+  isEnabled(): boolean {
+    if (typeof window === 'undefined') return false
+    const saved = localStorage.getItem('spectra_notif_enabled')
+    if (saved !== null) {
+      return saved === 'true'
+    }
+    return Notification.permission === 'granted'
+  }
+
+  /**
+   * Simpan preferensi aktivasi notifikasi pengguna
+   */
+  setEnabled(enabled: boolean) {
+    if (typeof window === 'undefined') return
+    localStorage.setItem('spectra_notif_enabled', enabled ? 'true' : 'false')
+  }
+
+  /**
    * Bunyikan alarm suara sintetis menggunakan Web Audio API
    */
   playAlertSound(type: 'warning' | 'danger') {
