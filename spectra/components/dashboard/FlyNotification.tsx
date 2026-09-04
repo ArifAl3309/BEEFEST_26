@@ -1,6 +1,8 @@
 'use client'
 
+import { useEffect } from 'react'
 import { AlertTriangle, ShieldAlert, X } from 'lucide-react'
+import { deviceNotification } from '@/lib/deviceNotification'
 
 export interface FlyAlertData {
   id: string
@@ -19,6 +21,21 @@ interface FlyNotificationProps {
 }
 
 export default function FlyNotification({ alert, onDismiss, onOpenPanel }: FlyNotificationProps) {
+  // Pemicu Native OS Notification & Sound saat ada Alert baru
+  useEffect(() => {
+    if (alert) {
+      const title = alert.status === 'danger'
+        ? `🚨 BAHAYA KELISTRIKAN: ${alert.panelName}`
+        : `⚠️ PERINGATAN BEBAN: ${alert.panelName}`
+      
+      deviceNotification.notify(title, {
+        body: `${alert.locationLabel ? `[${alert.locationLabel}] ` : ''}${alert.message}`,
+        status: alert.status,
+        panelId: alert.panelId,
+      })
+    }
+  }, [alert])
+
   if (!alert) return null
 
   const isDanger = alert.status === 'danger'

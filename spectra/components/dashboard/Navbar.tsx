@@ -56,6 +56,26 @@ export default function Navbar({ isConnected }: NavbarProps) {
           </span>
         </div>
 
+        {/* Device Alert Bell Toggle */}
+        <button
+          type="button"
+          onClick={async () => {
+            const { deviceNotification } = await import('@/lib/deviceNotification')
+            const granted = await deviceNotification.requestPermission()
+            if (granted) {
+              deviceNotification.notify('🔔 SPECTRA Device Alert Aktif', {
+                body: 'Sistem notifikasi OS telah terhubung untuk panel Waspada & Bahaya.',
+                status: 'warning',
+              })
+            }
+          }}
+          title="Aktifkan Notifikasi Sistem Laptop / HP"
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold text-amber-300 hover:text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all duration-200 whitespace-nowrap flex-shrink-0"
+        >
+          <span className="text-[13px]">🔔</span>
+          <span className="hidden md:inline">Notif Device</span>
+        </button>
+
         {/* Logout Button */}
         <button
           onClick={handleLogout}

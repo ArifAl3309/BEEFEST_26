@@ -87,10 +87,10 @@ export default function SidebarMetrics({
           {panel.latest_reading?.status === 'danger' && (
             <button
               onClick={() => setPlnModalOpen(true)}
-              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 text-white text-xs font-black tracking-wide flex items-center justify-center gap-2 hover:opacity-95 shadow-lg shadow-red-500/25 transition-all animate-pulse"
+              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 text-white text-xs font-black tracking-wide flex items-center justify-center gap-2 hover:opacity-95 shadow-lg shadow-red-500/25 transition-all animate-pulse whitespace-nowrap"
             >
-              <ShieldAlert size={18} />
-              <span>BANTUAN DARURAT POSKO PLN</span>
+              <ShieldAlert size={18} className="flex-shrink-0" />
+              <span className="truncate">BANTUAN DARURAT POSKO PLN</span>
             </button>
           )}
 
@@ -116,14 +116,14 @@ export default function SidebarMetrics({
             <MetricCard label="Frekuensi Listrik" value={fmt(panel.latest_reading?.frequency)} unit="Hz" icon="freq" />
           </div>
 
-          {/* Action: Hapus Panel Button */}
+          {/* Action: Hapus Panel Button (Anti-Orphan Single Line) */}
           <button
             type="button"
             onClick={() => onDeletePanel(panel.id)}
-            className="w-full py-3 px-4 rounded-2xl bg-red-600/15 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 transition-all shadow-md shadow-red-500/10"
+            className="w-full py-3 px-4 rounded-2xl bg-red-600/15 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 transition-all shadow-md shadow-red-500/10 whitespace-nowrap"
           >
-            <Trash2 size={16} />
-            <span>Hapus Titik Panel Ini</span>
+            <Trash2 size={16} className="flex-shrink-0" />
+            <span className="truncate">Hapus Titik Panel Ini</span>
           </button>
 
           {/* Edge Status & Sync */}

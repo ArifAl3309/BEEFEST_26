@@ -132,20 +132,19 @@ export default function OnboardingWizard() {
         <DeviceVerificationStep />
       )}
 
-      {/* Footer Actions */}
-      <div className="flex justify-between items-center pt-4 border-t border-slate-800/80">
+      {/* Footer Actions (Anti-Orphan: Single Line Buttons) */}
+      <div className="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-4 border-t border-slate-800/80">
         {step > 1 ? (
-          <Button variant="ghost" onClick={() => setStep(step - 1)} className="text-xs font-bold text-slate-400 hover:text-white">
+          <Button variant="ghost" onClick={() => setStep(step - 1)} className="text-xs font-bold text-slate-400 hover:text-white whitespace-nowrap">
             Kembali
           </Button>
         ) : <div />}
 
         {step === 1 ? (
-          /* Tombol Biru Aktif selalu bisa ditekan */
           <button
             type="button"
             onClick={handleProceedToStep2}
-            className="px-6 h-11 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white font-extrabold text-xs shadow-lg shadow-blue-500/25 active:scale-98 transition-all"
+            className="px-6 h-11 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white font-extrabold text-xs shadow-lg shadow-blue-500/25 active:scale-98 transition-all whitespace-nowrap flex items-center justify-center"
           >
             Lanjut ke Verifikasi Perangkat →
           </button>
@@ -154,7 +153,7 @@ export default function OnboardingWizard() {
             type="button"
             onClick={handleFinish}
             disabled={loading}
-            className="px-6 h-11 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/25 active:scale-98 transition-all disabled:opacity-50"
+            className="px-6 h-11 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/25 active:scale-98 transition-all disabled:opacity-50 whitespace-nowrap flex items-center justify-center"
           >
             {loading ? 'Menyimpan Konfigurasi...' : 'Selesaikan & Buka Dashboard →'}
           </button>
