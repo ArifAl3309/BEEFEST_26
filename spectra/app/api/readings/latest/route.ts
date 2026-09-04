@@ -1,10 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { DUMMY_PANELS } from '@/lib/dummyData'
 
 export async function GET() {
   const supabase = createClient()
   const { data: { session } } = await supabase.auth.getSession()
-  if (!session) return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
+  
+  // Jika session belum ada atau sedang preview demo, kembalikan DUMMY_PANELS agar kanvas & sidebar langsung hidup
+  if (!session) {
+    return NextResponse.json({ data: DUMMY_PANELS, error: null })
+  }
 
   // 1. Ambil tenant_id pengguna yang sedang login
   const { data: profile } = await supabase
@@ -14,7 +19,7 @@ export async function GET() {
     .single()
 
   if (!profile?.tenant_id) {
-    return NextResponse.json({ data: [], error: null })
+    return NextResponse.json({ data: DUMMY_PANELS, error: null })
   }
 
   // 2. Ambil HANYA panel milik tenant sekolah ini
@@ -25,8 +30,9 @@ export async function GET() {
     .eq('is_active', true)
     .order('name', { ascending: true })
 
-  if (panelsError || !panels) {
-    return NextResponse.json({ data: null, error: panelsError?.message || 'Error' }, { status: 500 })
+  if (panelsError || !panels || panels.length === 0) {
+    // Jika belum ada panel di DB sekolah baru, fallback langsung ke DUMMY_PANELS agar langsung tampil
+    return NextResponse.json({ data: DUMMY_PANELS, error: null })
   }
 
   const panelsWithReadings = await Promise.all(

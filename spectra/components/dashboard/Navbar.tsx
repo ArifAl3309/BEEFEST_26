@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Zap, LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Swirling } from '@/components/ui/swirling'
@@ -14,6 +14,36 @@ interface NavbarProps {
 
 export default function Navbar({ isConnected }: NavbarProps) {
   const [loggingOut, setLoggingOut] = useState(false)
+  const [notifActive, setNotifActive] = useState(false)
+
+  // Inisialisasi status lonceng dari deviceNotification
+  useEffect(() => {
+    import('@/lib/deviceNotification').then(({ deviceNotification }) => {
+      setNotifActive(deviceNotification.isEnabled())
+    })
+  }, [])
+
+  const handleToggleNotif = async () => {
+    const { deviceNotification } = await import('@/lib/deviceNotification')
+    if (notifActive) {
+      // Nonaktifkan
+      deviceNotification.setEnabled(false)
+      setNotifActive(false)
+    } else {
+      // Aktifkan & minta izin browser
+      const granted = await deviceNotification.requestPermission()
+      if (granted) {
+        deviceNotification.setEnabled(true)
+        setNotifActive(true)
+        deviceNotification.notify('🔔 Notifikasi Perangkat Diaktifkan', {
+          body: 'Sistem SPECTRA akan mengirim peringatan status Waspada & Bahaya ke HP/Laptop Anda.',
+          status: 'warning',
+        })
+      } else {
+        alert('Izin notifikasi ditolak oleh browser. Silakan aktifkan izin notifikasi di setelan browser Anda.')
+      }
+    }
+  }
 
   const handleLogout = async () => {
     if (loggingOut) return
@@ -56,24 +86,19 @@ export default function Navbar({ isConnected }: NavbarProps) {
           </span>
         </div>
 
-        {/* Device Alert Bell Toggle */}
+        {/* Device Alert Bell Toggle (Kuning Aktif vs Abu-abu Nonaktif) */}
         <button
           type="button"
-          onClick={async () => {
-            const { deviceNotification } = await import('@/lib/deviceNotification')
-            const granted = await deviceNotification.requestPermission()
-            if (granted) {
-              deviceNotification.notify('🔔 SPECTRA Device Alert Aktif', {
-                body: 'Sistem notifikasi OS telah terhubung untuk panel Waspada & Bahaya.',
-                status: 'warning',
-              })
-            }
-          }}
-          title="Aktifkan Notifikasi Sistem Laptop / HP"
-          className="flex items-center justify-center p-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold text-amber-300 hover:text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all duration-200 whitespace-nowrap flex-shrink-0"
+          onClick={handleToggleNotif}
+          title={notifActive ? 'Notifikasi Perangkat Aktif (Klik untuk nonaktifkan)' : 'Notifikasi Perangkat Nonaktif (Klik untuk aktifkan)'}
+          className={`flex items-center justify-center p-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
+            notifActive
+              ? 'text-amber-300 hover:text-amber-200 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
+              : 'text-slate-400 hover:text-slate-200 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60'
+          }`}
         >
-          <span className="text-xs sm:text-[13px]">🔔</span>
-          <span className="hidden sm:inline ml-1.5">Notif Device</span>
+          <span className={`text-xs sm:text-[13px] ${notifActive ? 'animate-bounce' : 'opacity-60'}`}>🔔</span>
+          <span className="hidden sm:inline ml-1.5">{notifActive ? 'Notif Aktif' : 'Notif Mati'}</span>
         </button>
 
         {/* Logout Button */}
