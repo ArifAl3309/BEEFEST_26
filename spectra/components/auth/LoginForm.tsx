@@ -19,7 +19,7 @@ export default function LoginForm() {
   const emailTouched = email.length > 0
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   const passwordTouched = password.length > 0
-  const isPasswordValid = password.length >= 6
+  const isPasswordValid = password.length >= 4
   const isFormValid = isEmailValid && isPasswordValid
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -27,7 +27,7 @@ export default function LoginForm() {
     setError('')
     if (!isFormValid) {
       if (!isEmailValid) setError('Format email belum valid.')
-      else if (!isPasswordValid) setError('Kata sandi minimal 6 karakter.')
+      else if (!isPasswordValid) setError('Kata sandi minimal 4 karakter.')
       return
     }
 
@@ -115,7 +115,7 @@ export default function LoginForm() {
             </label>
             {passwordTouched && (
               <span className={`text-[11px] font-semibold flex items-center gap-1 transition-all ${isPasswordValid ? 'text-emerald-400' : 'text-slate-400'}`}>
-                {isPasswordValid ? '✓ Cukup' : `${password.length}/6 karakter`}
+                {isPasswordValid ? '✓ Cukup' : `${password.length}/4 karakter`}
               </span>
             )}
           </div>

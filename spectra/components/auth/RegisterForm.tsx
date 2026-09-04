@@ -25,7 +25,7 @@ export default function RegisterForm() {
   const emailTouched = email.length > 0
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   const passwordTouched = password.length > 0
-  const isPasswordValid = password.length >= 6
+  const isPasswordValid = password.length >= 4
   const isFormValid = isCodeValid && isNameValid && isEmailValid && isPasswordValid
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -35,7 +35,7 @@ export default function RegisterForm() {
       if (!isCodeValid) setError('Kode Aktivasi minimal 5 karakter.')
       else if (!isNameValid) setError('Nama lengkap minimal 3 karakter.')
       else if (!isEmailValid) setError('Format email belum valid.')
-      else if (!isPasswordValid) setError('Kata sandi minimal 6 karakter.')
+      else if (!isPasswordValid) setError('Kata sandi minimal 4 karakter.')
       return
     }
 
@@ -206,7 +206,7 @@ export default function RegisterForm() {
             </label>
             {passwordTouched && (
               <span className={`text-[11px] font-semibold flex items-center gap-1 transition-all ${isPasswordValid ? 'text-emerald-400' : 'text-slate-400'}`}>
-                {isPasswordValid ? '✓ Cukup' : `${password.length}/6 karakter`}
+                {isPasswordValid ? '✓ Cukup' : `${password.length}/4 karakter`}
               </span>
             )}
           </div>
