@@ -6,36 +6,10 @@
 class DeviceNotificationService {
   private audioCtx: AudioContext | null = null
   private permissionGranted: boolean = false
-  private enabled: boolean = true
 
   constructor() {
-    if (typeof window !== 'undefined') {
-      if ('Notification' in window) {
-        this.permissionGranted = Notification.permission === 'granted'
-      }
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').catch(() => {})
-      }
-      // Ambil preferensi user dari localStorage (default: true)
-      const saved = localStorage.getItem('spectra_device_notif_enabled')
-      this.enabled = saved !== null ? saved === 'true' : true
-    }
-  }
-
-  /**
-   * Cek apakah notifikasi sistem sedang aktif
-   */
-  isEnabled(): boolean {
-    return this.enabled && this.permissionGranted
-  }
-
-  /**
-   * Toggle status aktif/nonaktif
-   */
-  setEnabled(status: boolean) {
-    this.enabled = status
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('spectra_device_notif_enabled', status ? 'true' : 'false')
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      this.permissionGranted = Notification.permission === 'granted'
     }
   }
 
@@ -127,9 +101,6 @@ class DeviceNotificationService {
   async notify(title: string, options?: { body: string; status?: 'warning' | 'danger'; panelId?: string }) {
     if (typeof window === 'undefined') return
 
-    // Jika user menonaktifkan lonceng, jangan kirim alarm suara dan banner OS
-    if (!this.enabled) return
-
     // 1. Bunyikan audio chime
     this.playAlertSound(options?.status || 'warning')
 
@@ -146,27 +117,11 @@ class DeviceNotificationService {
       }
     }
 
-    // 3. Tampilkan Banner Notifikasi Sistem (Mendukung Android System Notification drawer dari atas)
+    // 3. Tampilkan Banner Notifikasi Sistem
     if (!('Notification' in window)) return
 
     if (Notification.permission === 'granted') {
       try {
-        // Coba via ServiceWorker terlebih dahulu (standar HP Android untuk slide-down drawer notification)
-        if ('serviceWorker' in navigator) {
-          const reg = await navigator.serviceWorker.getRegistration()
-          if (reg && reg.showNotification) {
-            await reg.showNotification(title, {
-              body: options?.body || '',
-              icon: '/favicon.ico',
-              badge: '/favicon.ico',
-              tag: options?.panelId ? `spectra-panel-${options.panelId}` : 'spectra-alert',
-              requireInteraction: options?.status === 'danger',
-            })
-            return
-          }
-        }
-
-        // Fallback native Notification object
         const notif = new Notification(title, {
           body: options?.body || '',
           icon: '/favicon.ico',
@@ -180,7 +135,7 @@ class DeviceNotificationService {
           notif.close()
         }
       } catch {
-        // fallback
+        // fallback untuk beberapa mobile browser yang membutuhkan ServiceWorker
       }
     } else if (Notification.permission !== 'denied') {
       const granted = await this.requestPermission()

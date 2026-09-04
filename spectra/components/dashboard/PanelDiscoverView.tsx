@@ -58,13 +58,11 @@ export default function PanelDiscoverView({ panel, onBack }: PanelDiscoverViewPr
     return () => clearInterval(interval)
   }, [fetchHistory])
 
-  // Format data untuk Recharts (Format Lengkap: Jam:Menit:Detik WIB)
+  // Format data untuk Recharts
   const formattedChartData = chartData.map((d) => {
     const time = new Date(d.created_at).toLocaleTimeString('id-ID', {
-      hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      hour12: false,
     })
     return {
       time,
@@ -155,31 +153,28 @@ export default function PanelDiscoverView({ panel, onBack }: PanelDiscoverViewPr
           <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950/80 border border-slate-800">
             <button
               onClick={() => setActiveTab('thermal')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeTab === 'thermal'
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'thermal'
                   ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
                   : 'text-slate-400 hover:text-white'
-              }`}
+                }`}
             >
               Termal & Suhu
             </button>
             <button
               onClick={() => setActiveTab('electrical')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeTab === 'electrical'
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'electrical'
                   ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
                   : 'text-slate-400 hover:text-white'
-              }`}
+                }`}
             >
               Arus & Daya
             </button>
             <button
               onClick={() => setActiveTab('fft')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeTab === 'fft'
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'fft'
                   ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
                   : 'text-slate-400 hover:text-white'
-              }`}
+                }`}
             >
               Stabilitas Tegangan
             </button>
@@ -434,13 +429,12 @@ export default function PanelDiscoverView({ panel, onBack }: PanelDiscoverViewPr
                 return (
                   <tr
                     key={log.id}
-                    className={`hover:bg-slate-900/50 transition-colors h-14 ${
-                      isDanger
+                    className={`hover:bg-slate-900/50 transition-colors h-14 ${isDanger
                         ? 'bg-red-950/20 text-red-300'
                         : isWarning
-                        ? 'bg-amber-950/20 text-amber-300'
-                        : 'text-slate-300'
-                    }`}
+                          ? 'bg-amber-950/20 text-amber-300'
+                          : 'text-slate-300'
+                      }`}
                   >
                     <td className="py-2.5 px-4 font-mono text-xs align-middle whitespace-nowrap">
                       <div className="flex flex-col justify-center leading-tight">
@@ -450,13 +444,12 @@ export default function PanelDiscoverView({ panel, onBack }: PanelDiscoverViewPr
                     </td>
                     <td className="py-3.5 px-4 align-middle">
                       <span
-                        className={`inline-flex items-center justify-center min-w-[84px] px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider ${
-                          isDanger
+                        className={`inline-flex items-center justify-center min-w-[84px] px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider ${isDanger
                             ? 'bg-red-500/20 text-red-400 border border-red-500/40'
                             : isWarning
-                            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
-                            : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                        }`}
+                              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
+                              : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                          }`}
                       >
                         {log.status}
                       </span>
@@ -471,9 +464,8 @@ export default function PanelDiscoverView({ panel, onBack }: PanelDiscoverViewPr
                       {fmt(log.power, 'W')}
                     </td>
                     <td
-                      className={`py-3.5 px-4 font-mono font-bold text-xs align-middle ${
-                        (log.temperature_panel || 0) > 60 ? 'text-red-400' : ''
-                      }`}
+                      className={`py-3.5 px-4 font-mono font-bold text-xs align-middle ${(log.temperature_panel || 0) > 60 ? 'text-red-400' : ''
+                        }`}
                     >
                       {fmt(log.temperature_panel, '°C')}
                     </td>

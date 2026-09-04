@@ -7,6 +7,7 @@ import PanelDiscoverView from '@/components/dashboard/PanelDiscoverView'
 import FlyNotification, { FlyAlertData } from '@/components/dashboard/FlyNotification'
 import { PanelWithReading, SensorReading } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client'
+import { DUMMY_PANELS } from '@/lib/dummyData'
 
 interface ProfileQueryResponse {
   full_name: string
@@ -82,30 +83,33 @@ export default function DashboardPage() {
     fetch('/api/readings/latest')
       .then((res) => res.json())
       .then((json) => {
-        if (json.data) {
-          json.data.forEach((p: PanelWithReading) => {
-            if (p.latest_reading) {
-              triggerFlyAlert(p.id, p.name, p.location_label || '', p.latest_reading)
-            }
-          })
+        const panelList: PanelWithReading[] = (json.data && json.data.length > 0) ? json.data : DUMMY_PANELS
+        
+        panelList.forEach((p: PanelWithReading) => {
+          if (p.latest_reading) {
+            triggerFlyAlert(p.id, p.name, p.location_label || '', p.latest_reading)
+          }
+        })
 
-          setPanels((prev) => {
-            if (prev.length === 0) return json.data
-            return json.data.map((newP: PanelWithReading) => {
-              const existing = prev.find((e) => e.id === newP.id)
-              return existing ? { ...newP, floor_x: existing.floor_x, floor_y: existing.floor_y } : newP
-            })
+        setPanels((prev) => {
+          if (prev.length === 0) return panelList
+          return panelList.map((newP: PanelWithReading) => {
+            const existing = prev.find((e) => e.id === newP.id)
+            return existing ? { ...newP, floor_x: existing.floor_x, floor_y: existing.floor_y } : newP
           })
+        })
 
-          // Update data panel aktif di Discover More jika sedang dibuka
-          setDiscoverPanel((prev) => {
-            if (!prev) return null
-            const updated = json.data.find((p: PanelWithReading) => p.id === prev.id)
-            return updated || prev
-          })
-        }
+        // Update data panel aktif di Discover More jika sedang dibuka
+        setDiscoverPanel((prev) => {
+          if (!prev) return null
+          const updated = panelList.find((p: PanelWithReading) => p.id === prev.id)
+          return updated || prev
+        })
       })
-      .catch(() => {})
+      .catch(() => {
+        // Fallback offline / network error ke DUMMY_PANELS agar saat recording selalu ada data hidup
+        setPanels((prev) => prev.length === 0 ? DUMMY_PANELS : prev)
+      })
   }, [triggerFlyAlert])
 
   // Inisialisasi awal + Auto Polling setiap 2.5 detik
