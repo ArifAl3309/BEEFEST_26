@@ -9,6 +9,8 @@ import {
   ZoomOut,
   RotateCcw,
   Building2,
+  ImagePlus,
+  RefreshCw,
 } from 'lucide-react'
 
 interface FloorPlanProps {
@@ -39,6 +41,48 @@ export default function InteractiveFloorPlan({
   const [scale, setScale] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isPanning, setIsPanning] = useState(false)
+
+  // Custom Floor Plan Image State (Mendukung upload denah baru & ganti denah)
+  const [floorPlanUrl, setFloorPlanUrl] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    // Muat custom floor plan tersimpan jika ada
+    const saved = localStorage.getItem('spectra_custom_floor_plan')
+    if (saved) {
+      setFloorPlanUrl(saved)
+    }
+  }, [])
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const result = event.target?.result as string
+      if (result) {
+        setFloorPlanUrl(result)
+        try {
+          localStorage.setItem('spectra_custom_floor_plan', result)
+        } catch {
+          // kuota localStorage overflow (jika gambar sangat besar)
+        }
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleRemoveFloorPlan = () => {
+    if (confirm('Apakah Anda yakin ingin menghapus denah ini dan mengunggah denah baru?')) {
+      setFloorPlanUrl(null)
+      localStorage.removeItem('spectra_custom_floor_plan')
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+        fileInputRef.current.click()
+      }
+    }
+  }
 
   // Refs untuk sinkronisasi nilai state terkini secara real-time pada event listener
   const transformRef = useRef({ scale: 1, pan: { x: 0, y: 0 } })
@@ -236,8 +280,43 @@ export default function InteractiveFloorPlan({
           </div>
         </div>
 
-        {/* Right Controls: Zoom Buttons */}
-        <div className="flex items-center gap-1 sm:gap-2.5 flex-shrink-0">
+        {/* Right Controls: Upload / Ganti Denah + Zoom Buttons */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
+          {/* Hidden File Input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+
+          {/* Tombol Masukkan Denah / Hapus dan Ganti Denah */}
+          {floorPlanUrl ? (
+            <button
+              type="button"
+              onClick={handleRemoveFloorPlan}
+              title="Hapus denah saat ini dan unggah gambar denah baru"
+              className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-red-500/10 text-slate-300 hover:text-red-400 border border-slate-800 hover:border-red-500/30 text-xs font-bold transition-all shadow-md flex-shrink-0"
+            >
+              <RefreshCw size={13} className="text-sky-400 sm:w-3.5 sm:h-3.5" />
+              <span className="hidden sm:inline">Hapus & Ganti Denah</span>
+              <span className="sm:hidden">Ganti</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              title="Unggah gambar blueprint denah lantai gedung sekolah"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/20 flex-shrink-0 active:scale-95"
+            >
+              <ImagePlus size={14} className="flex-shrink-0" />
+              <span className="hidden sm:inline">Masukkan Denah</span>
+              <span className="sm:hidden">Denah</span>
+            </button>
+          )}
+
+          {/* Zoom Buttons */}
           <div className="flex items-center gap-0.5 sm:gap-1 p-1 sm:p-1.5 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-slate-800 shadow-xl">
             <button
               type="button"
@@ -303,11 +382,19 @@ export default function InteractiveFloorPlan({
             transition: isPanning ? 'none' : 'transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1)',
           }}
         >
-          <img
-            src="/floor-plan-placeholder.svg"
-            alt="Denah Gedung Sekolah"
-            className="w-full h-full object-cover pointer-events-none opacity-95 select-none"
-          />
+          {floorPlanUrl ? (
+            <img
+              src={floorPlanUrl}
+              alt="Denah Gedung Sekolah Kustom"
+              className="w-full h-full object-contain pointer-events-none opacity-95 select-none"
+            />
+          ) : (
+            <img
+              src="/floor-plan-placeholder.svg"
+              alt="Denah Gedung Sekolah Standar"
+              className="w-full h-full object-cover pointer-events-none opacity-95 select-none"
+            />
+          )}
 
           {panels.map((panel) => (
             <PanelNode
