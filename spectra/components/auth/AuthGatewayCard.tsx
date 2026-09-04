@@ -12,11 +12,13 @@ export default function AuthGatewayCard() {
     <div className="w-full bg-[rgba(14,18,30,0.85)] backdrop-blur-xl border border-[--border] rounded-2xl p-8 shadow-2xl shadow-black/80">
       {/* Brand Header */}
       <div className="flex flex-col items-center gap-2 mb-6 text-center">
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/30">
-            <Zap size={24} className="text-[--cyan] animate-pulse" />
-          </div>
-          <span className="text-2xl font-bold tracking-[0.25em] text-white">SPECTRA</span>
+        <div className="flex items-center gap-3">
+          <img
+            src="/spectra-logo.png"
+            alt="SPECTRA Logo"
+            className="w-11 h-11 rounded-2xl object-contain shadow-[0_0_20px_rgba(14,165,233,0.35)]"
+          />
+          <span className="text-2xl font-black tracking-[0.25em] text-white">SPECTRA</span>
         </div>
         <p className="text-xs text-[--text-secondary]">
           Electrical Safety & Command Center Multi-Tenant

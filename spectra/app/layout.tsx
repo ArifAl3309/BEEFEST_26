@@ -11,6 +11,11 @@ const fontHind = Hind({
 export const metadata: Metadata = {
   title: 'SPECTRA — Electrical Safety Command Center',
   description: 'Sistem SaaS Pemantauan Dini Kebakaran Panel Listrik Sekolah',
+  icons: {
+    icon: '/spectra-logo.png',
+    shortcut: '/spectra-logo.png',
+    apple: '/spectra-logo.png',
+  },
 }
 
 export default function RootLayout({
