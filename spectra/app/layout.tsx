@@ -18,6 +18,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'SPECTRA — Electrical Safety Command Center',
   description: 'Sistem SaaS Pemantauan Dini Kebakaran Panel Listrik Sekolah',
+  icons: {
+    icon: '/spectra-icon.svg',
+    shortcut: '/spectra-icon.svg',
+    apple: '/spectra-icon.svg',
+  },
 }
 
 export default function RootLayout({
