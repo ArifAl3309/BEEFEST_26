@@ -17,8 +17,8 @@ export default function RootLayout({
   children,
 }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={fontHind.variable}>
-      <body className="font-sans antialiased bg-[#06080F] text-slate-100">{children}</body>
+    <html lang="id" className={`${fontHind.variable} overflow-x-hidden max-w-full`}>
+      <body className="font-sans antialiased bg-[#06080F] text-slate-100 overflow-x-hidden max-w-full w-full min-h-screen">{children}</body>
     </html>
   )
 }
