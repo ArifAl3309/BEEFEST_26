@@ -363,6 +363,37 @@ export default function InteractiveFloorPlan({
         }`}
         style={{ minHeight: '380px' }}
       >
+        {/* Floating Floor Plan Upload Button (Always Visible in Top-Left of Denah) */}
+        <div className="absolute top-5 left-5 z-20 flex items-center gap-2">
+          {floorPlanUrl ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleRemoveFloorPlan()
+              }}
+              title="Hapus denah saat ini dan ganti gambar denah baru"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-900/95 hover:bg-red-500/20 text-slate-200 hover:text-red-400 border border-slate-700/80 hover:border-red-500/40 text-xs font-bold transition-all shadow-2xl backdrop-blur-md"
+            >
+              <RefreshCw size={14} className="text-sky-400" />
+              <span>Hapus &amp; Ganti Denah</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                fileInputRef.current?.click()
+              }}
+              title="Unggah blueprint denah gedung sekolah"
+              className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white text-xs font-black tracking-wide transition-all shadow-[0_0_20px_rgba(14,165,233,0.4)] backdrop-blur-md active:scale-95"
+            >
+              <ImagePlus size={16} />
+              <span>Masukkan Denah</span>
+            </button>
+          )}
+        </div>
+
         {/* Fixed Compass Indicator */}
         <div className="absolute top-5 right-5 z-20 pointer-events-none flex flex-col items-center justify-center w-11 h-11 rounded-full bg-[#0E1626]/90 border border-slate-700/60 shadow-xl backdrop-blur-md">
           <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[10px] border-b-sky-400" />
