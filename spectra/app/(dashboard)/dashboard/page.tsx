@@ -74,6 +74,21 @@ export default function DashboardPage() {
           message,
           time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
         })
+
+        // 3. Kirim notifikasi ke sistem OS HP / Laptop jika mode lonceng aktif (kuning)
+        import('@/lib/deviceNotification').then(({ deviceNotification }) => {
+          if (deviceNotification.isEnabled()) {
+            const title =
+              reading.status === 'danger'
+                ? `🚨 BAHAYA KRITIS: ${panelName}`
+                : `⚠️ WASPADA BEBAN: ${panelName}`
+            deviceNotification.notify(title, {
+              body: `${locationLabel ? locationLabel + ' — ' : ''}${message}`,
+              status: reading.status as 'warning' | 'danger',
+              panelId,
+            })
+          }
+        })
       }
     }
   }, [])

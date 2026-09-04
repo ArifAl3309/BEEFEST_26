@@ -137,25 +137,39 @@ class DeviceNotificationService {
       }
     }
 
-    // 3. Tampilkan Banner Notifikasi Sistem
+    // 3. Tampilkan Banner Notifikasi Sistem (Dukungan penuh HP Android via ServiceWorker & Desktop)
     if (!('Notification' in window)) return
 
     if (Notification.permission === 'granted') {
-      try {
-        const notif = new Notification(title, {
-          body: options?.body || '',
-          icon: '/favicon.ico',
-          badge: '/favicon.ico',
-          tag: options?.panelId ? `spectra-panel-${options.panelId}` : 'spectra-alert',
-          requireInteraction: options?.status === 'danger',
-        })
+      const notifOptions: NotificationOptions = {
+        body: options?.body || '',
+        icon: '/favicon.ico',
+        badge: '/favicon.ico',
+        tag: options?.panelId ? `spectra-panel-${options.panelId}` : 'spectra-alert',
+        requireInteraction: options?.status === 'danger',
+      }
 
+      // Khusus HP Android & PWA: Wajib via ServiceWorkerRegistration agar muncul di drawer atas OS
+      if ('serviceWorker' in navigator) {
+        try {
+          const reg = await navigator.serviceWorker.ready
+          if (reg && reg.showNotification) {
+            await reg.showNotification(title, notifOptions)
+            return
+          }
+        } catch {
+          // fallback ke new Notification()
+        }
+      }
+
+      try {
+        const notif = new Notification(title, notifOptions)
         notif.onclick = () => {
           window.focus()
           notif.close()
         }
       } catch {
-        // fallback untuk beberapa mobile browser yang membutuhkan ServiceWorker
+        // fallback browser
       }
     } else if (Notification.permission !== 'denied') {
       const granted = await this.requestPermission()
