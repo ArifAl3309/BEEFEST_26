@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Zap, LogOut } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Swirling } from '@/components/ui/swirling'
 import LoadingOverlay from '@/components/ui/LoadingOverlay'

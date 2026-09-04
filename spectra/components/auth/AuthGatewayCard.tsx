@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Zap } from 'lucide-react'
 import LoginForm from './LoginForm'
 import RegisterForm from './RegisterForm'
 
