@@ -280,9 +280,9 @@ export default function InteractiveFloorPlan({
           </div>
         </div>
 
-        {/* Right Controls: Upload / Ganti Denah + Zoom Buttons */}
+        {/* Right Controls: Hidden File Input + Zoom Buttons */}
         <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
-          {/* Hidden File Input */}
+          {/* Hidden File Input (Dipicu oleh tombol floating di dalam denah) */}
           <input
             ref={fileInputRef}
             type="file"
@@ -290,31 +290,6 @@ export default function InteractiveFloorPlan({
             onChange={handleFileUpload}
             className="hidden"
           />
-
-          {/* Tombol Masukkan Denah / Hapus dan Ganti Denah */}
-          {floorPlanUrl ? (
-            <button
-              type="button"
-              onClick={handleRemoveFloorPlan}
-              title="Hapus denah saat ini dan unggah gambar denah baru"
-              className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-red-500/10 text-slate-300 hover:text-red-400 border border-slate-800 hover:border-red-500/30 text-xs font-bold transition-all shadow-md flex-shrink-0"
-            >
-              <RefreshCw size={13} className="text-sky-400 sm:w-3.5 sm:h-3.5" />
-              <span className="hidden sm:inline">Hapus & Ganti Denah</span>
-              <span className="sm:hidden">Ganti</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              title="Unggah gambar blueprint denah lantai gedung sekolah"
-              className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/20 flex-shrink-0 active:scale-95"
-            >
-              <ImagePlus size={14} className="flex-shrink-0" />
-              <span className="hidden sm:inline">Masukkan Denah</span>
-              <span className="sm:hidden">Denah</span>
-            </button>
-          )}
 
           {/* Zoom Buttons */}
           <div className="flex items-center gap-0.5 sm:gap-1 p-1 sm:p-1.5 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-slate-800 shadow-xl">
