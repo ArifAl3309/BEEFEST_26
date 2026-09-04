@@ -8,8 +8,13 @@ class DeviceNotificationService {
   private permissionGranted: boolean = false
 
   constructor() {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      this.permissionGranted = Notification.permission === 'granted'
+    if (typeof window !== 'undefined') {
+      if ('Notification' in window) {
+        this.permissionGranted = Notification.permission === 'granted'
+      }
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(() => {})
+      }
     }
   }
 
@@ -117,11 +122,27 @@ class DeviceNotificationService {
       }
     }
 
-    // 3. Tampilkan Banner Notifikasi Sistem
+    // 3. Tampilkan Banner Notifikasi Sistem (Mendukung Android System Notification drawer dari atas)
     if (!('Notification' in window)) return
 
     if (Notification.permission === 'granted') {
       try {
+        // Coba via ServiceWorker terlebih dahulu (standar HP Android untuk slide-down drawer notification)
+        if ('serviceWorker' in navigator) {
+          const reg = await navigator.serviceWorker.getRegistration()
+          if (reg && reg.showNotification) {
+            await reg.showNotification(title, {
+              body: options?.body || '',
+              icon: '/favicon.ico',
+              badge: '/favicon.ico',
+              tag: options?.panelId ? `spectra-panel-${options.panelId}` : 'spectra-alert',
+              requireInteraction: options?.status === 'danger',
+            })
+            return
+          }
+        }
+
+        // Fallback native Notification object
         const notif = new Notification(title, {
           body: options?.body || '',
           icon: '/favicon.ico',
@@ -135,7 +156,7 @@ class DeviceNotificationService {
           notif.close()
         }
       } catch {
-        // fallback untuk beberapa mobile browser yang membutuhkan ServiceWorker
+        // fallback
       }
     } else if (Notification.permission !== 'denied') {
       const granted = await this.requestPermission()
