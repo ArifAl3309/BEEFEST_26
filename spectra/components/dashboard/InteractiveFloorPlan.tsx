@@ -42,6 +42,9 @@ export default function InteractiveFloorPlan({
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isPanning, setIsPanning] = useState(false)
 
+  // Drag node state: panel yang sedang dalam mode drag aktif (double-click)
+  const [dragPanelId, setDragPanelId] = useState<string | null>(null)
+
   // Custom Floor Plan Image State (Mendukung upload denah baru & ganti denah)
   const [floorPlanUrl, setFloorPlanUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -132,8 +135,8 @@ export default function InteractiveFloorPlan({
   const startPosRef = useRef({ x: 0, y: 0 })
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    // Jangan pan jika user mengklik tombol atau elemen interaktif
-    if ((e.target as HTMLElement)?.closest('button, [data-interactive="true"]')) return
+    // Jangan pan jika user mengklik tombol atau elemen node panel / mode drag
+    if ((e.target as HTMLElement)?.closest('button, [data-interactive="true"], [data-panel-node="true"]')) return
     e.preventDefault() // Cegah seleksi teks dan ghost drag native browser
 
     isPanningRef.current = true
@@ -171,6 +174,8 @@ export default function InteractiveFloorPlan({
   const touchStartRef = useRef<{ x: number; y: number; dist: number }>({ x: 0, y: 0, dist: 0 })
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    if ((e.target as HTMLElement)?.closest('button, [data-interactive="true"], [data-panel-node="true"]')) return
+
     if (e.touches.length === 1) {
       setIsPanning(true)
       touchStartRef.current = {
@@ -381,6 +386,7 @@ export default function InteractiveFloorPlan({
         {/* Transform Layer Denah Arsitektur */}
         <div
           ref={transformLayerRef}
+          data-transform-layer="true"
           className="relative w-full h-full will-change-transform"
           style={{
             transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
@@ -407,8 +413,20 @@ export default function InteractiveFloorPlan({
               key={panel.id}
               panel={panel}
               isSelected={panel.id === selectedPanelId}
+              isDragMode={dragPanelId === panel.id}
               onSelect={() => {
                 onSelectPanel(panel.id)
+              }}
+              onToggleDragMode={() => {
+                setDragPanelId((prev) => (prev === panel.id ? null : panel.id))
+              }}
+              onPositionChange={async (newX, newY) => {
+                onNodeMoved(panel.id, newX, newY)
+                await fetch('/api/panels/update-position', {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ panelId: panel.id, floor_x: newX, floor_y: newY }),
+                })
               }}
             />
           ))}
